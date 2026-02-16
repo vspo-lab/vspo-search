@@ -35,6 +35,7 @@
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
 		"test": "vitest",
+		"test:integration": "vitest run --config vitest.integration.config.ts",
 		"test:run": "vitest run",
 		"wrangler:login": "wrangler login"
 	}
