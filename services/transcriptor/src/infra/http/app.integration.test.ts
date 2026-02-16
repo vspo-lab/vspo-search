@@ -35,9 +35,7 @@ describe("createApp integration", () => {
 		createTranscriptUseCaseMock.mockReturnValue({
 			fetch: fetchMock,
 		});
-		serveMock.mockReturnValue((c: { body: (body: unknown, status?: number) => Response }) =>
-			c.body(null, 204),
-		);
+		serveMock.mockReturnValue(() => new Response(null, { status: 204 }));
 	});
 
 	it("handles transcript and workflow endpoints", async () => {
