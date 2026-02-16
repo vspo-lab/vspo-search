@@ -98,7 +98,7 @@ Not allowed:
 
 Sections:
 
-1. **Search Scope**: stream/clip/short toggle chips
+1. **Search Scope**: stream/clip toggle chips
 2. **Output Mode**: selectable cards for `Video Search`, `Follow-up Answer`, `Analysis`
 3. **Analysis Lens**: topic trend, member share, sentiment tone, comparison
 4. **Members**: member chips with member color dot

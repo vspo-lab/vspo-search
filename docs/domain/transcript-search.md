@@ -119,7 +119,7 @@ Rules:
 | published_at | TIMESTAMP | Publish datetime (UTC) |
 | duration_sec | INTEGER | Video duration |
 | thumbnail_url | VARCHAR | Thumbnail URL |
-| video_type | VARCHAR | `stream` / `clip` / `short` |
+| video_type | VARCHAR | `stream` / `clip` |
 
 #### `transcript_segments`
 
