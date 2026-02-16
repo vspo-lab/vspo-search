@@ -2,49 +2,52 @@
 
 ## Overview
 
-`vspo-search` is a transcript-driven discovery system for YouTube streams and clips.
-The product scope now includes three integrated capabilities in one conversation flow:
+`vspo-search` is a multi-source discovery system for VTuber-related content.
+It combines YouTube transcripts and X posts in one conversational workflow.
 
-1. **Search**: find relevant videos and timestamped transcript segments
-2. **Follow-up Answer**: generate evidence-grounded answers from retrieved segments
-3. **Analysis**: summarize trends and comparisons across candidate videos
+The product provides three integrated capabilities:
 
-The system must make every generated answer and analysis traceable to transcript evidence.
+1. **Search**: retrieve relevant YouTube moments and X posts
+2. **Follow-up Answer**: generate grounded answers from retrieved evidence
+3. **Analysis**: summarize cross-source trends and comparisons
+
+Every answer and analysis result must be traceable to source evidence.
 
 ## Product Goals
 
-1. Let users find specific moments from long streams quickly
-2. Let users ask follow-up questions without starting over
-3. Let users compare members/topics/time windows directly in the same interface
-4. Keep operating costs low using browser execution for core retrieval
+1. Let users find specific stream moments quickly
+2. Add social context from X without leaving the same flow
+3. Support follow-up questions with preserved context
+4. Keep operation cost low with browser-first retrieval
 
 ## Non-Goals (Current Scope)
 
 1. User account system
 2. Personalized long-term history sync
-3. Fully autonomous insight generation without explicit user prompts
+3. Autonomous posting or action execution on X
 
 ## High-Level Architecture
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│ Data Ingestion (Cloudflare Workflow + yt-dlp container)         │
-│  - fetch transcript json3                                        │
-│  - save raw transcript to R2                                     │
+│ Data Ingestion                                                   │
+│  - YouTube transcript fetch (Cloudflare Workflow + yt-dlp)      │
+│  - X post collector (scheduled/API-based ingestion)             │
+│  - save raw data to R2                                           │
 └──────────────────────────────────────────────────────────────────┘
                          ↓
 ┌──────────────────────────────────────────────────────────────────┐
 │ Data Preparation (ETL)                                           │
-│  - normalize metadata and segments                               │
+│  - normalize video metadata and transcript segments              │
+│  - normalize X post metadata and text                            │
 │  - export Parquet datasets for browser query                     │
 └──────────────────────────────────────────────────────────────────┘
                          ↓
 ┌──────────────────────────────────────────────────────────────────┐
 │ Web App (TanStack Start + DuckDB-WASM)                          │
-│  Search      -> candidate videos + hit segments                  │
-│  Answer      -> grounded response with citations                 │
-│  Analysis    -> aggregate metrics from candidate set             │
-│  Conversation UI renders all three in one response              │
+│  Search      -> candidate evidence across YouTube and X          │
+│  Answer      -> grounded response with mixed-source citations    │
+│  Analysis    -> aggregate trends by source/member/topic/time     │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -55,54 +58,56 @@ The system must make every generated answer and analysis traceable to transcript
 Input:
 
 - Query text
+- Source filter (`youtube` / `x` / `all`)
 - Member filters
-- Video type filters
-- Date range filters
+- YouTube type filter (`stream` / `clip`)
+- Date range
 
 Output:
 
-- Candidate videos (`top N`)
-- Matched transcript segments per video
-- Timestamp links for verification
+- Candidate video results with timestamps
+- Candidate X posts with post links and metrics
+- Unified ranked evidence list for downstream use
 
 ### 2. Follow-up Answer Generation
 
 Input:
 
-- User follow-up question
-- Candidate video set from current/previous search turn
-- Matched transcript segments
+- Follow-up question
+- Candidate evidence from current/previous turn
+- Active source filters
 
 Output:
 
-- Concise answer text
+- Concise answer
 - Confidence hint (optional)
-- Citation list (video, timestamp, snippet)
+- Citation list with source labels (`YouTube` / `X`)
 
 Rules:
 
 1. Do not assert facts without citation candidates
-2. If evidence is insufficient, return explicit uncertainty
-3. Prefer short grounded synthesis over long speculative text
+2. If evidence is weak or source-biased, state uncertainty
+3. Prefer short grounded synthesis over speculative text
 
 ### 3. Analysis
 
 Input:
 
-- Candidate set and matched segments
-- Active analysis lens (topic trend/member share/sentiment/comparison)
+- Candidate evidence set
+- Active lens (topic trend/member share/sentiment/comparison)
 
 Output:
 
-- Aggregated counters and rates
-- Ranked entities (member/topic/video)
-- Time-window insight (for trend lens)
+- Aggregate counts and rates
+- Cross-source distribution (YouTube vs X)
+- Ranked entities (member/topic/post/video)
+- Time-window insights
 
 Rules:
 
 1. Analysis must be reproducible from candidate data
-2. Every aggregate metric should map to a clear denominator/window
-3. Preserve filter context unless user requests reset
+2. Every metric must show denominator/window context
+3. Preserve search filters unless user requests reset
 
 ## Data Model
 
@@ -130,6 +135,23 @@ Rules:
 | duration_ms | INTEGER | Segment duration |
 | text | VARCHAR | Transcript text |
 
+#### `x_posts`
+
+| Column | Type | Description |
+|--------|------|-------------|
+| post_id | VARCHAR | X post ID |
+| author_id | VARCHAR | Author account ID |
+| author_handle | VARCHAR | Author handle |
+| display_name | VARCHAR | Display name |
+| posted_at | TIMESTAMP | Post datetime (UTC) |
+| lang | VARCHAR | Language code |
+| text | VARCHAR | Post body text |
+| like_count | INTEGER | Likes |
+| repost_count | INTEGER | Reposts |
+| reply_count | INTEGER | Replies |
+| quote_count | INTEGER | Quotes |
+| permalink | VARCHAR | X post URL |
+
 ### Derived Views
 
 #### `transcript_fulltext`
@@ -141,72 +163,88 @@ Full-text concatenation per video for coarse retrieval.
 | video_id | VARCHAR | Video ID |
 | full_text | VARCHAR | Concatenated segment text |
 
-#### `search_hit_segments` (runtime temporary view)
+#### `x_posts_fulltext`
 
-Used by Answer and Analysis layers.
+Normalized post text for retrieval.
 
 | Column | Type | Description |
 |--------|------|-------------|
-| query_id | VARCHAR | Query execution identifier |
-| video_id | VARCHAR | Video ID |
-| start_ms | INTEGER | Matched start time |
-| text | VARCHAR | Matched transcript snippet |
-| score | DOUBLE | Optional relevance score |
-| keyword_hits | INTEGER | Matched keyword count |
+| post_id | VARCHAR | X post ID |
+| full_text | VARCHAR | Normalized post text |
+
+#### `search_hits` (runtime temporary view)
+
+Unified evidence for answer and analysis.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| query_id | VARCHAR | Query execution ID |
+| source_type | VARCHAR | `youtube` / `x` |
+| source_id | VARCHAR | `video_id` or `post_id` |
+| occurred_at | TIMESTAMP | Published/posted datetime |
+| excerpt | VARCHAR | Evidence snippet |
+| score | DOUBLE | Ranking score |
+| keyword_hits | INTEGER | Keyword hit count |
 
 ## Query Flow
 
-### Search SQL (Phase 1 baseline)
+### YouTube Search SQL (baseline)
 
 ```sql
-SELECT t.video_id,
+SELECT t.video_id AS source_id,
+       'youtube' AS source_type,
        t.title,
        t.channel_name,
-       t.thumbnail_url,
-       t.published_at,
-       t.video_type
+       t.published_at AS occurred_at,
+       ft.full_text
 FROM transcripts t
 JOIN transcript_fulltext ft ON t.video_id = ft.video_id
-WHERE ft.full_text ILIKE '%keyword%'
-ORDER BY t.published_at DESC
-LIMIT 20;
+WHERE ft.full_text ILIKE '%keyword%';
 ```
 
-### Segment Extraction
+### X Search SQL (baseline)
 
 ```sql
-SELECT s.video_id,
-       s.start_ms,
-       s.duration_ms,
-       s.text
-FROM transcript_segments s
-WHERE s.video_id IN (...candidate_video_ids...)
-  AND s.text ILIKE '%keyword%'
-ORDER BY s.video_id, s.start_ms;
+SELECT p.post_id AS source_id,
+       'x' AS source_type,
+       p.author_handle,
+       p.posted_at AS occurred_at,
+       p.text AS full_text,
+       p.like_count,
+       p.repost_count
+FROM x_posts p
+WHERE p.text ILIKE '%keyword%';
 ```
+
+### Unified Ranking (conceptual)
+
+1. Execute source-specific retrieval
+2. Normalize to `search_hits`
+3. Rank by recency + relevance + engagement
+4. Return grouped results by source type
 
 ### Answer Pipeline (conceptual)
 
-1. Select high-signal hit segments from candidates
-2. Build grounded context bundle
+1. Select high-signal evidence from `search_hits`
+2. Build grounded context bundle with source labels
 3. Generate concise answer with citation anchors
-4. Return answer + citation list
+4. Return answer + mixed-source citations
 
 ### Analysis Pipeline (conceptual)
 
-1. Group hit segments by selected lens
-2. Compute aggregates (count/rate/peak window)
+1. Aggregate `search_hits` by lens and source
+2. Compute source share, trend windows, and entity ranks
 3. Return compact cards and distributions
 
 ## UI Requirements Impact
 
-The UI must support section-level rendering in one system response:
+The UI response supports section-level rendering:
 
-1. Search results section
-2. Follow-up answer section
-3. Analysis section
+1. Search results (YouTube cards + X post cards)
+2. Follow-up answer (mixed-source citations)
+3. Analysis (includes source-share metrics)
 
-If one section fails, others should still render with partial success state.
+If one source fails, render partial success with source-level error notices.
 
 ## Error Handling
 
@@ -214,51 +252,53 @@ Follow Result-style error semantics (`event + cause + recovery`).
 
 Error classes:
 
-1. Search execution failure
-2. Evidence extraction failure
-3. Answer generation timeout/failure
-4. Analysis computation failure
+1. YouTube search execution failure
+2. X search execution failure
+3. Evidence extraction failure
+4. Answer generation timeout/failure
+5. Analysis computation failure
 
 Recovery behavior:
 
-- Retry where safe
-- Preserve user query in input
-- Display fallback text with retry action
+- Retry source fetch where safe
+- Preserve user query and filters
+- Render partial results from healthy source(s)
 
 ## Performance Targets
 
 | Metric | Target |
 |--------|--------|
 | DuckDB-WASM init | < 3 sec |
-| Search query | < 500 ms |
+| YouTube-only search | < 500 ms |
+| X-only search | < 350 ms |
+| Combined search | < 800 ms |
 | Follow-up answer generation | < 2 sec |
 | Analysis generation | < 1.5 sec |
-| End-to-end response (all enabled) | < 3 sec |
 
 ## Cost and Scalability
 
-- Keep retrieval in browser for low cost operation
-- Keep R2 as source-of-truth store
-- For >10k video scale, evaluate partitioning or hybrid server search
+- Keep retrieval browser-first for low baseline cost
+- Store normalized datasets in R2 as Parquet
+- For larger scale (>10k videos, >1M posts), evaluate hybrid server retrieval
 
 ## Roadmap
 
 ### Phase 1 (Current Target)
 
-1. Transcript search with timestamp results
+1. YouTube transcript search with timestamp links
 2. Follow-up grounded answer generation
 3. Analysis summary blocks and comparison lens
 
 ### Phase 2
 
-1. Better ranking and relevance scoring
-2. Saved query presets and sharable analysis links
-3. Incremental ETL and freshness metadata automation
+1. X data ingestion and normalized post search
+2. Mixed-source citations in answer generation
+3. Cross-source analysis metrics and filters
 
 ### Phase 3
 
-1. Semantic retrieval (hybrid lexical + vector)
-2. Cross-session conversation memory
+1. Hybrid lexical + semantic retrieval
+2. Cross-session memory and personalized ranking
 3. Exportable structured reports
 
 ## References

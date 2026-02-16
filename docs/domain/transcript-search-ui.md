@@ -2,13 +2,14 @@
 
 ## Overview
 
-This document defines the UI specification for the upgraded `vspo-search` experience.
-The screen is no longer a video-search-only interface.
-It now provides a single conversational workflow for:
+This document defines the upgraded `vspo-search` UI.
+The experience supports unified conversation-based retrieval from both YouTube transcripts and X posts.
 
-1. Video search from transcript data
-2. Follow-up answer generation grounded in transcript evidence
-3. Multi-video analysis for trends and comparisons
+The main workflow combines:
+
+1. Search across sources
+2. Follow-up answer generation with citations
+3. Cross-source analysis
 
 **Wireframe**: `services/web/wireframe/transcript-search.html`
 
@@ -16,38 +17,32 @@ It now provides a single conversational workflow for:
 
 ### Primary Goal
 
-Help users move from "find a relevant video" to "get a verifiable answer" and then to "understand broader patterns" without leaving one screen.
+Move users from "finding content" to "understanding context" with verifiable evidence from both YouTube and X.
 
-### Differentiation from generic video search
+### Product Differentiation
 
-The UI must make the following value visible:
-
-1. Evidence-grounded follow-up answers with timestamp citations
-2. Analysis view generated from the same candidate set (no context switch)
-3. Continuous conversational memory for iterative questions
-4. Suggested next actions (compare, share, drill deeper)
+1. One query can return video moments and social reactions
+2. Follow-up answers cite mixed evidence with source labels
+3. Analysis explicitly shows source distribution and trend shifts
+4. Users can keep iterating without changing screens
 
 ## Visual Direction
 
 ### Color Policy
 
-Use a mostly neutral and consistent palette for shell, cards, controls, and system states.
+Use a neutral, consistent palette for shell, cards, and controls.
 
 Allowed colorful usage:
 
-1. Member color dots and member-identifying accents
-2. Thumbnail mock gradients that include member color
+1. Member color dots and member-related accents
+2. Thumbnail gradients and source logos/icons
 
-Not allowed:
-
-1. Multiple vivid accent colors for unrelated UI controls
-2. Different saturated colors for each feature mode (Search/Answer/Analysis)
+Avoid overusing saturated colors for each feature mode.
 
 ### Typography
 
 - Display: `Shippori Mincho B1`
 - Body/UI: `M PLUS Rounded 1c`
-- Keep body text legible with compact but readable spacing
 
 ## Layout
 
@@ -55,196 +50,187 @@ Not allowed:
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
-│ Header (sticky): Brand + prototype/meta                      │
+│ Header (sticky): Brand + context                              │
 ├───────────────────────────────────────────────────────────────┤
-│ Hero: Product promise + feature badges + KPI cards           │
+│ Hero: Value proposition + KPI cards                           │
 ├──────────────┬────────────────────────────────────────────────┤
-│ Sidebar      │ Status Bar                                     │
-│ - Scope      │ Conversation timeline                          │
-│ - OutputMode │  User question                                 │
-│ - Lens       │  System response                               │
-│ - Members    │   - Search results                             │
+│ Sidebar      │ Status bar                                     │
+│ - Source     │ Conversation timeline                          │
+│ - Scope      │  User message                                  │
+│ - OutputMode │  System response                               │
+│ - Lens       │   - YouTube results                            │
+│ - Members    │   - X results                                  │
 │ - Date       │   - Follow-up answer                           │
-│ - Value card │   - Analysis blocks                            │
-│              │ Input toolbar + input field (sticky bottom)    │
+│ - Value card │   - Analysis                                   │
+│              │ Input toolbar + prompt (sticky bottom)         │
 └──────────────┴────────────────────────────────────────────────┘
 ```
 
 ### Mobile (<= 768px)
 
 - Sidebar opens as overlay drawer
-- Main conversation remains primary surface
-- KPI cards collapse into stacked layout
-- Video cards switch from horizontal to vertical
+- Source chips remain visible in input toolbar
+- Video and X cards stack vertically
 
 ## Component Specification
 
 ### 1. Header
 
-- Sticky with blurred neutral background
-- Contains brand and compact environment label
-- Mobile filter button toggles sidebar overlay
+- Sticky neutral header with brand and metadata
+- Mobile filter toggle for sidebar drawer
 
 ### 2. Hero
 
-- Communicates upgraded value proposition
-- Shows three feature badges: Search, Follow-up Answer, Analysis
-- Shows KPI mini-cards:
-  - Indexed Videos
-  - Answer Mode state
-  - Current Analysis Lens
+- Clear statement that search covers YouTube + X
+- Feature badges include cross-source retrieval capability
+- KPI cards show video and post coverage
 
 ### 3. Sidebar
 
 Sections:
 
-1. **Search Scope**: stream/clip toggle chips
-2. **Output Mode**: selectable cards for `Video Search`, `Follow-up Answer`, `Analysis`
-3. **Analysis Lens**: topic trend, member share, sentiment tone, comparison
-4. **Members**: member chips with member color dot
-5. **Date Range**: `from` and `to`
-6. **Differentiator Callout**: short bullets explaining product value
+1. **Data Source**: `YouTube`, `X`, `All`
+2. **Search Scope**: stream/clip toggle
+3. **Output Mode**: `Video Search`, `Follow-up Answer`, `Analysis`
+4. **Analysis Lens**: topic trend/member share/sentiment/comparison
+5. **Members**: member chips with color dots
+6. **Date Range**: from/to
+7. **Differentiator Callout**: explain mixed-source value
 
 Behavior:
 
-- Member chip interaction keeps `All` fallback behavior
-- Output mode chips can be independently enabled/disabled
-- Analysis lens affects only analysis cards and not search SQL filters
+- `All` is the default source mode
+- Source filters apply to search, answer context, and analysis
+- Analysis lens changes analytics blocks only
 
 ### 4. Status Bar
 
-Shows:
+Displays:
 
 - Data readiness
-- Indexed video count
+- Indexed video count and indexed X post count
 - Last update timestamp
-- Runtime capability flags (answer grounding, analysis cache)
+- Runtime capability flags
 
-### 5. Conversation Message (System)
+### 5. System Response Structure
 
-A system message can contain up to three result sections:
+A system response can include these sections:
 
-1. **Search Results**
-2. **Follow-up Answer**
-3. **Analysis**
+1. YouTube search cards
+2. X search cards
+3. Follow-up answer
+4. Analysis blocks
+5. Next actions
 
-The message header includes a mode switch display so users understand what was generated.
+### 6. YouTube Result Card
 
-### 6. Search Result Cards
-
-Each card includes:
+Includes:
 
 - Thumbnail
 - Title
-- Channel (member color dot)
+- Channel/member context
 - Publish date
-- Video type tag (neutral style)
-- Transcript timestamp snippets with highlighted terms
+- Video type
+- Timestamp snippets with keyword highlights
 
-Timestamp links must use:
+Timestamp links use:
 
 `https://www.youtube.com/watch?v={videoId}&t={seconds}s`
 
-### 7. Follow-up Answer Card
+### 7. X Result Card
 
-Required elements:
+Includes:
 
-1. Direct answer sentence
-2. Brief rationale paragraph
-3. Citation list (timestamp + quote snippet source)
+- Author display name and handle
+- Post datetime
+- Post text snippet with highlights
+- Engagement metrics (likes/reposts/replies)
+- Link to original post
+
+Post links use source permalink from dataset.
+
+### 8. Follow-up Answer Card
+
+Required:
+
+1. Direct answer statement
+2. Short rationale
+3. Citation list with source labels (`YouTube`, `X`)
 
 Rules:
 
-- Answer must be grounded only in retrieved transcript segments
-- Citation count should be >= 2 for non-trivial answers
-- If evidence is weak, explicitly show low-confidence message
+- Only cite retrieved evidence
+- For mixed-source claims, include both source types when available
+- Show uncertainty when source evidence conflicts
 
-### 8. Analysis Section
+### 9. Analysis Section
 
-Required blocks:
+Required:
 
-1. Summary metrics (count, top member, peak window)
-2. Distribution bars or equivalent compact visualization
-3. Lens-dependent details (topic trend/member share/sentiment/comparison)
-
-Analysis is generated from the same candidate set returned by search, unless user requests wider scope.
-
-### 9. Next Actions
-
-Show contextual action chips under system response:
-
-- Continue comparison
-- Share answer
-- Show more evidence
+1. Summary metrics
+2. Source distribution (YouTube vs X)
+3. Lens-dependent ranking/trend visual blocks
 
 ### 10. Input Area
 
 Contains:
 
-1. Quick mode chips (`Search`, `Answer`, `Analysis`, `Comparison report`)
-2. Main input
-3. Send button
-4. Hint text for keyboard shortcuts and query syntax
+1. Quick mode chips (`Search`, `Answer`, `Analysis`, `Compare`)
+2. Source chips (`All`, `YouTube`, `X`)
+3. Main input and send action
+4. Query syntax hints
 
 ## Interaction and State
 
-### Initial State
-
-- Hero visible in expanded form
-- Empty conversation area contains prompt examples (future implementation)
-
 ### Query Submitted
 
-1. Run transcript search with active filters
-2. Render Search section
-3. If enabled, run Answer generation over result snippets
-4. If enabled, run Analysis aggregation over same result set
-5. Render Next Actions
+1. Execute retrieval on active source(s)
+2. Render grouped results by source
+3. If enabled, run answer generation from grouped evidence
+4. If enabled, run analysis with source-share metrics
+5. Render suggested next actions
 
 ### Follow-up Query
 
-- Keep previous context (selected members, filters, candidate result set)
-- Show explicit context inheritance indicator (future enhancement)
+- Preserve source filter and member/date context
+- Reuse prior candidate set unless user broadens scope
 
-### Errors
+### Failure Handling
 
-Error messages must follow `event + cause + recovery` structure:
-
-- Search query failure
-- Answer generation timeout
-- Analysis computation failure
-
-Each failed section may show partial fallback while keeping other successful sections visible.
+- Source-level failures are isolated
+- If X retrieval fails, YouTube results still render (and vice versa)
+- Error copy follows `event + cause + recovery`
 
 ## Accessibility
 
 - Conversation container: `role="log"`, `aria-live="polite"`
 - Status bar: `role="status"`
-- Mode switch and mode chips: keyboard operable and focus visible
-- Timestamps: meaningful link text for screen readers
-- Sidebar overlay: focus trap on mobile
+- Source/mode controls must be keyboard accessible
+- Card links have clear labels for screen readers
+- Mobile sidebar overlay uses focus trap
 
 ## Performance Targets
 
 | Metric | Target |
 |--------|--------|
-| Initial UI render (hero + shell) | < 1.5 s |
-| Search response | < 500 ms (1k videos scale) |
+| Initial UI shell render | < 1.5 s |
+| YouTube-only search | < 500 ms |
+| X-only search | < 350 ms |
+| Combined search | < 800 ms |
 | Follow-up answer generation | < 2.0 s |
-| Analysis block generation | < 1.5 s |
-| Combined response (all modes) | < 3.0 s |
+| Analysis rendering | < 1.5 s |
 
 ## Phase Mapping
 
 | Feature | MVP | Next |
 |---------|:---:|:---:|
-| Transcript keyword search | Yes | Yes |
-| Timestamp citation links | Yes | Yes |
+| YouTube transcript search | Yes | Yes |
 | Follow-up grounded answer | Yes | Yes |
 | Analysis summary blocks | Yes | Yes |
-| Next action shortcuts | Yes | Yes |
-| Comparison report export |  | Yes |
-| Long-term memory across sessions |  | Yes |
+| X data ingestion and search |  | Yes |
+| Mixed-source citations |  | Yes |
+| Cross-source share visualization |  | Yes |
+| Exportable comparison report |  | Yes |
 
 ## References
 

@@ -402,6 +402,12 @@ h1, h2, h3 {
   background: rgba(171, 125, 66, 0.1);
 }
 
+.source-chip.active {
+  background: #374151;
+  border-color: #374151;
+  color: #fff;
+}
+
 .date-inputs {
   display: grid;
   grid-template-columns: 1fr;
@@ -617,6 +623,14 @@ h1, h2, h3 {
   margin-bottom: 8px;
 }
 
+.source-subtitle {
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
 .video-cards {
   display: grid;
   gap: 10px;
@@ -721,6 +735,71 @@ h1, h2, h3 {
   background: rgba(171, 125, 66, 0.22);
   color: var(--ink);
   border-radius: 2px;
+}
+
+.x-cards {
+  display: grid;
+  gap: 8px;
+}
+
+.x-card {
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 10px 11px;
+}
+
+.x-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.x-author {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.x-handle {
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+}
+
+.x-post-time {
+  font-size: 0.66rem;
+  color: var(--ink-muted);
+}
+
+.x-text {
+  font-size: 0.74rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.x-text mark {
+  background: rgba(171, 125, 66, 0.22);
+  border-radius: 2px;
+  color: var(--ink);
+}
+
+.x-footer {
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.67rem;
+  color: var(--ink-muted);
+}
+
+.metric-pill {
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  padding: 2px 7px;
+  background: var(--surface-soft);
 }
 
 .answer-card {
@@ -841,6 +920,13 @@ h1, h2, h3 {
 }
 
 .input-toolbar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.input-source {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
@@ -1050,8 +1136,9 @@ kbd {
         <p class="hero-sub">動画検索に加えて、フォローアップ回答生成と横断分析を同じ会話画面で実行。検索結果をそのまま「答え」と「比較インサイト」に変換します。</p>
         <div class="hero-features">
           <span class="feature-badge">Transcript Search</span>
+          <span class="feature-badge">X Signal Retrieval</span>
           <span class="feature-badge">Follow-up Grounded Answer</span>
-          <span class="feature-badge">Cross Video Analysis</span>
+          <span class="feature-badge">Cross Source Analysis</span>
         </div>
       </div>
       <div class="hero-kpis" aria-label="key metrics">
@@ -1060,12 +1147,12 @@ kbd {
           <span class="kpi-value">1,847</span>
         </div>
         <div class="kpi-card">
-          <span class="kpi-label">Answer Mode</span>
-          <span class="kpi-value">ON</span>
+          <span class="kpi-label">Indexed X Posts</span>
+          <span class="kpi-value">92,440</span>
         </div>
         <div class="kpi-card">
           <span class="kpi-label">Analysis Lens</span>
-          <span class="kpi-value">Topic</span>
+          <span class="kpi-value">Cross Source</span>
         </div>
       </div>
     </div>
@@ -1080,6 +1167,15 @@ kbd {
       </button>
 
       <div class="sidebar-title">search controls</div>
+
+      <section class="filter-section">
+        <span class="filter-label">Data Source</span>
+        <div class="filter-chip-group">
+          <button class="chip source-chip active">All</button>
+          <button class="chip source-chip active">YouTube</button>
+          <button class="chip source-chip active">X</button>
+        </div>
+      </section>
 
       <section class="filter-section">
         <span class="filter-label">Search Scope</span>
@@ -1144,9 +1240,9 @@ kbd {
       <section class="sidebar-callout">
         <h3>Feature Differentiators</h3>
         <ul>
-          <li>検索結果から即時に回答文を生成</li>
-          <li>引用元タイムスタンプで検証可能</li>
-          <li>複数動画を横断して話題変化を分析</li>
+          <li>Generate answers from mixed YouTube and X evidence</li>
+          <li>Verify claims with timestamps and post permalinks</li>
+          <li>Analyze trend shifts between stream and social reactions</li>
         </ul>
       </section>
     </aside>
@@ -1155,11 +1251,11 @@ kbd {
       <div class="status-bar" role="status">
         <div class="status-left">
           <span class="status-dot" aria-hidden="true"></span>
-          <span>Data ready · <strong>1,847 videos</strong> · Last update 2026-02-16 02:15 JST</span>
+          <span>Data ready · <strong>1,847 videos</strong> + <strong>92,440 X posts</strong> · Last update 2026-02-16 02:15 JST</span>
         </div>
         <div class="status-meta">
           <span>Answer grounding: Enabled</span>
-          <span>Analysis cache: Warm</span>
+          <span>Source fusion: Enabled</span>
         </div>
       </div>
 
@@ -1175,16 +1271,17 @@ kbd {
           </div>
           <div class="msg-bubble msg-bubble--system">
             <div class="msg-head">
-              <div class="result-count"><strong>5件</strong>の候補動画を発見し、回答と分析を生成しました</div>
-              <div class="mode-switch" role="tablist" aria-label="result mode tabs">
-                <button class="mode-chip active" role="tab" aria-selected="true">Search</button>
-                <button class="mode-chip active" role="tab" aria-selected="true">Answer</button>
-                <button class="mode-chip active" role="tab" aria-selected="true">Analysis</button>
+              <div class="result-count"><strong>8件</strong>の根拠を発見（動画3件 / X投稿5件）し、回答と分析を生成しました</div>
+              <div class="mode-switch" aria-label="result sections">
+                <button class="mode-chip active" aria-pressed="true">Search</button>
+                <button class="mode-chip active" aria-pressed="true">Answer</button>
+                <button class="mode-chip active" aria-pressed="true">Analysis</button>
               </div>
             </div>
 
             <section class="result-section">
               <h2 class="result-title">Search Results</h2>
+              <div class="source-subtitle">YouTube Matches</div>
               <div class="video-cards">
                 <article class="video-card" role="article">
                   <div class="video-thumb" style="background: linear-gradient(140deg, #B0C4DE, #cec7ba);">
@@ -1221,6 +1318,41 @@ kbd {
                   </div>
                 </article>
               </div>
+
+              <div class="source-subtitle" style="margin-top:10px;">X Matches</div>
+              <div class="x-cards">
+                <article class="x-card" role="article">
+                  <div class="x-head">
+                    <div>
+                      <span class="x-author">ぶいすぽ速報</span>
+                      <span class="x-handle">@vspo_feed</span>
+                    </div>
+                    <span class="x-post-time">2025/01/14 21:03</span>
+                  </div>
+                  <p class="x-text">CR CUP前日の<mark>練習</mark>配信、すみれさん仕上がりすごい。明日の<mark>大会</mark>かなり期待。</p>
+                  <div class="x-footer">
+                    <span class="metric-pill">Like 2.4k</span>
+                    <span class="metric-pill">Repost 410</span>
+                    <a class="timestamp" href="#"><span class="ts-time">open post</span><span class="ts-text">source permalink</span></a>
+                  </div>
+                </article>
+
+                <article class="x-card" role="article">
+                  <div class="x-head">
+                    <div>
+                      <span class="x-author">大会ウォッチャー</span>
+                      <span class="x-handle">@scrim_watch</span>
+                    </div>
+                    <span class="x-post-time">2025/01/14 22:41</span>
+                  </div>
+                  <p class="x-text">ひなのさんの<mark>練習</mark>量もえぐい。今日の仕上がりだと<mark>大会</mark>当日が楽しみ。</p>
+                  <div class="x-footer">
+                    <span class="metric-pill">Like 1.8k</span>
+                    <span class="metric-pill">Repost 255</span>
+                    <a class="timestamp" href="#"><span class="ts-time">open post</span><span class="ts-text">source permalink</span></a>
+                  </div>
+                </article>
+              </div>
             </section>
 
             <section class="result-section">
@@ -1229,9 +1361,9 @@ kbd {
                 <div class="answer-title">回答: 花芽すみれが最も練習量に言及していました</div>
                 <p>抽出した5本の候補動画のうち、練習に関する直接言及の頻度と継続時間が最も高いのは花芽すみれでした。特に大会前日配信で長時間にわたる反復練習が確認できます。</p>
                 <div class="citation-list">
-                  <div class="citation-item">証拠1: 花芽すみれ - 0:45:12 「大会前の練習ってほんとに緊張する」</div>
-                  <div class="citation-item">証拠2: 花芽すみれ - 2:30:05 「今日の練習で大会の作戦固まった」</div>
-                  <div class="citation-item">証拠3: 橘ひなの - 0:12:30 「大会の練習しないとまずい」</div>
+                  <div class="citation-item">YouTube証拠1: 花芽すみれ - 0:45:12 「大会前の練習ってほんとに緊張する」</div>
+                  <div class="citation-item">YouTube証拠2: 花芽すみれ - 2:30:05 「今日の練習で大会の作戦固まった」</div>
+                  <div class="citation-item">X証拠: @vspo_feed 2025/01/14 21:03 「CR CUP前日の練習配信...大会かなり期待」</div>
                 </div>
               </div>
             </section>
@@ -1244,18 +1376,18 @@ kbd {
                   <strong>42</strong>
                 </div>
                 <div class="analysis-card">
-                  <span>Top Member</span>
+                  <span>Top Member (YouTube)</span>
                   <strong>花芽すみれ</strong>
                 </div>
                 <div class="analysis-card">
-                  <span>Peak Window</span>
-                  <strong>大会前日 20:00-22:00</strong>
+                  <span>Source Share</span>
+                  <strong>YouTube 38% / X 62%</strong>
                 </div>
               </div>
               <div class="analysis-bars">
-                <div class="analysis-row"><span>花芽すみれ</span><div class="bar-track"><div class="bar-fill" style="width: 76%;"></div></div><span>76%</span></div>
-                <div class="analysis-row"><span>橘ひなの</span><div class="bar-track"><div class="bar-fill" style="width: 52%;"></div></div><span>52%</span></div>
-                <div class="analysis-row"><span>小森めと</span><div class="bar-track"><div class="bar-fill" style="width: 31%;"></div></div><span>31%</span></div>
+                <div class="analysis-row"><span>YouTube</span><div class="bar-track"><div class="bar-fill" style="width: 38%;"></div></div><span>38%</span></div>
+                <div class="analysis-row"><span>X</span><div class="bar-track"><div class="bar-fill" style="width: 62%;"></div></div><span>62%</span></div>
+                <div class="analysis-row"><span>Sentiment Peak</span><div class="bar-track"><div class="bar-fill" style="width: 71%;"></div></div><span>71%</span></div>
               </div>
             </section>
 
@@ -1263,7 +1395,7 @@ kbd {
               <h2 class="result-title">Next Actions</h2>
               <div class="follow-up-actions">
                 <button class="action-btn primary">比較分析を続ける</button>
-                <button class="action-btn">この回答を共有</button>
+                <button class="action-btn">X反応を深掘り</button>
                 <button class="action-btn">根拠をもっと表示</button>
               </div>
             </section>
@@ -1283,8 +1415,13 @@ kbd {
           <button class="quick-mode active">分析</button>
           <button class="quick-mode">比較レポート</button>
         </div>
+        <div class="input-source" aria-label="quick data sources">
+          <button class="quick-mode active">All</button>
+          <button class="quick-mode active">YouTube</button>
+          <button class="quick-mode active">X</button>
+        </div>
         <div class="chat-input-wrapper">
-          <input class="chat-input" type="text" aria-label="質問を入力" placeholder="例: 3人の練習頻度を時系列で比較して" />
+          <input class="chat-input" type="text" aria-label="質問を入力" placeholder="例: 大会前日の配信内容とXの反応をまとめて" />
           <button class="send-btn" aria-label="送信">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
           </button>
@@ -1292,7 +1429,7 @@ kbd {
         <div class="input-hints">
           <span><kbd>Enter</kbd> 送信</span>
           <span>AND / OR で条件指定</span>
-          <span>追質問すると回答を文脈継続</span>
+          <span>データソースを切り替えて検索範囲を制御</span>
         </div>
       </div>
     </main>
@@ -1300,15 +1437,18 @@ kbd {
 </div>
 
 <script>
+let overlayHideTimer;
+
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("sidebarOverlay");
   const isOpen = sidebar.classList.contains("open");
+  clearTimeout(overlayHideTimer);
 
   if (isOpen) {
     sidebar.classList.remove("open");
     overlay.classList.remove("visible");
-    setTimeout(() => {
+    overlayHideTimer = setTimeout(() => {
       overlay.style.display = "none";
     }, 280);
     return;
@@ -1352,6 +1492,9 @@ for (const group of document.querySelectorAll(".filter-chip-group")) {
 for (const element of document.querySelectorAll(".mode-btn, .quick-mode, .mode-chip")) {
   element.addEventListener("click", () => {
     element.classList.toggle("active");
+    if (element.hasAttribute("aria-pressed")) {
+      element.setAttribute("aria-pressed", String(element.classList.contains("active")));
+    }
   });
 }
 </script>
