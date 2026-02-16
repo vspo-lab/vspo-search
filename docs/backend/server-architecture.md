@@ -39,21 +39,34 @@ services/transcriptor/
     ├── domain/
     │   └── transcript.ts       # Zod Schema + TranscriptKey Companion Object
     ├── usecase/
-    │   └── transcript.ts       # TranscriptUseCase.from(deps) → fetch / fetchAndSave
+    │   └── transcript.ts       # TranscriptUseCase.from(ports) → fetch / saveRaw
     ├── infra/
     │   ├── container/
     │   │   └── ytdlp.ts        # YtdlpContainer DO + TranscriptFetcher
-    │   └── repository/
-    │       └── transcript.ts   # R2 TranscriptRepository (wrapped with Result via wrap)
-    ├── workflow/
-    │   └── transcript-workflow.ts  # Cloudflare Workflow (step-based execution)
+    │   ├── http/
+    │   │   ├── app.ts          # Hono app composition
+    │   │   ├── route-inngest.ts
+    │   │   ├── route-transcript.ts
+    │   │   └── route-workflow.ts
+    │   ├── inngest/
+    │   │   ├── client.ts       # Inngest client + Hono bindings middleware
+    │   │   └── functions/
+    │   │       └── process-transcript.ts # Event-driven transcript processing
+    │   ├── repository/
+    │   │   ├── job.ts          # D1 JobRepository for processing status
+    │   │   └── transcript.ts   # R2 TranscriptRepository (wrapped with Result via wrap)
+    │   ├── usecase/
+    │   │   └── transcript.ts   # Infra adapters wired into usecase ports
+    │   └── workflow/
+    │       └── transcript-workflow.ts  # Cloudflare Workflow (step-based execution)
     └── index.ts                # Entry point + HTTP routes
 ```
 
 **Worker-specific design principles:**
 
-- **UseCase handles orchestration**: `TranscriptUseCase.from(deps)` integrates Fetcher + Repository
-- **Workflow calls UseCase**: Executes usecase.fetchAndSave() within steps
+- **UseCase depends on ports**: `TranscriptUseCase.from(ports)` has no infra imports
+- **Infra composes dependencies**: `createTranscriptUseCase()` wires fetcher + repository
+- **Workflow calls UseCase**: Executes usecase `fetch()` + `saveRaw()` within steps
 - **HTTP handler also calls UseCase**: Shares the same business logic
 - **Env bindings replace DI**: `this.env.YT_CONTAINER`, `this.env.TRANSCRIPT_BUCKET`
 - **Repository uses factory pattern**: `TranscriptRepository.from(bucket)` injects the R2 bucket
@@ -61,10 +74,10 @@ services/transcriptor/
 - **Domain layer is pure**: Zod Schema + Companion Object, no external dependencies
 
 ```typescript
-// Example of Result chaining in UseCase
-const fetchResult = await TranscriptFetcher.fetch(binding, videoId, lang);
+// Example of Result chaining through usecase ports
+const fetchResult = await usecase.fetch(params);
 if (fetchResult.err) return fetchResult;  // Propagate AppError
-return repo.save("raw", params, fetchResult.val);
+return usecase.saveRaw(params, fetchResult.val);
 ```
 
 ## Layer Structure

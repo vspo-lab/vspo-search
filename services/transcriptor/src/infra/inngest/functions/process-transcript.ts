@@ -1,5 +1,5 @@
-import { JobRepository } from "../../infra/repository/job";
-import { TranscriptUseCase } from "../../usecase/transcript";
+import { JobRepository } from "../../repository/job";
+import { createTranscriptUseCase } from "../../usecase/transcript";
 import { inngest } from "../client";
 import { z } from "zod";
 
@@ -43,20 +43,28 @@ export const processTranscript = inngest.createFunction(
 
 		// Step 3: Fetch transcript via yt-dlp and save to R2
 		const saveResult = await step.run("fetch-and-save", async () => {
-			const usecase = TranscriptUseCase.from({
+			const usecase = createTranscriptUseCase({
 				containerBinding: cfEnv.YT_CONTAINER,
 				bucket: cfEnv.TRANSCRIPT_BUCKET,
 			});
 
-			const result = await usecase.fetchAndSave({
+			const fetchResult = await usecase.fetch({
 				videoId: video_id,
 				lang,
 			});
-
-			if (result.err) {
-				return { ok: false as const, error: result.err.message };
+			if (fetchResult.err) {
+				return { ok: false as const, error: fetchResult.err.message };
 			}
-			return { ok: true as const, key: result.val.key };
+
+			const storeResult = await usecase.saveRaw(
+				{ videoId: video_id, lang },
+				fetchResult.val,
+			);
+			if (storeResult.err) {
+				return { ok: false as const, error: storeResult.err.message };
+			}
+
+			return { ok: true as const, key: storeResult.val.key };
 		});
 
 		// Step 4: Update job status based on result

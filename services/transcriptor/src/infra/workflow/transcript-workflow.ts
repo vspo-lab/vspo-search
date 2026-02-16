@@ -3,8 +3,8 @@ import {
 	type WorkflowEvent,
 	type WorkflowStep,
 } from "cloudflare:workers";
-import type { TranscriptParams } from "../domain/transcript";
-import { TranscriptUseCase } from "../usecase/transcript";
+import type { TranscriptParams } from "../../domain/transcript";
+import { createTranscriptUseCase } from "../usecase/transcript";
 
 export class TranscriptWorkflow extends WorkflowEntrypoint<
 	Env,
@@ -24,18 +24,25 @@ export class TranscriptWorkflow extends WorkflowEntrypoint<
 				timeout: "5 minutes",
 			},
 			async () => {
-				const usecase = TranscriptUseCase.from({
+				const usecase = createTranscriptUseCase({
 					containerBinding: this.env.YT_CONTAINER,
 					bucket: this.env.TRANSCRIPT_BUCKET,
 				});
 
-				const result = await usecase.fetchAndSave({ videoId, lang });
-
-				if (result.err) {
-					throw new Error(result.err.message);
+				const fetchResult = await usecase.fetch({ videoId, lang });
+				if (fetchResult.err) {
+					throw new Error(fetchResult.err.message);
 				}
 
-				return { key: result.val.key };
+				const saveResult = await usecase.saveRaw(
+					{ videoId, lang },
+					fetchResult.val,
+				);
+				if (saveResult.err) {
+					throw new Error(saveResult.err.message);
+				}
+
+				return { key: saveResult.val.key };
 			},
 		);
 	}
