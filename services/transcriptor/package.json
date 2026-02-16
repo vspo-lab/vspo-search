@@ -25,6 +25,7 @@
 	"devDependencies": {
 		"@types/node": "catalog:",
 		"typescript": "5.9.3",
+		"vitest": "^4.0.18",
 		"wrangler": "4.65.0"
 	},
 	"private": true,
@@ -33,6 +34,8 @@
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
+		"test": "vitest",
+		"test:run": "vitest run",
 		"wrangler:login": "wrangler login"
 	}
 }

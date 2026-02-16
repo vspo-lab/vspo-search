@@ -1,9 +1,23 @@
+import { AppError, wrap } from "@vspo/errors";
 import { runRequestSchema } from "./schema";
 import type { TranscriptorApp } from "./types";
 
 export const registerWorkflowRoutes = (app: TranscriptorApp) => {
 	app.post("/run", async (c) => {
-		const parsed = runRequestSchema.safeParse(await c.req.json());
+		const bodyResult = await wrap(
+			c.req.json(),
+			(err) =>
+				new AppError({
+					code: "BAD_REQUEST",
+					message: "invalid json body",
+					cause: err,
+				}),
+		);
+		if (bodyResult.err) {
+			return c.json({ error: bodyResult.err.message }, 400);
+		}
+
+		const parsed = runRequestSchema.safeParse(bodyResult.val);
 		if (!parsed.success) {
 			return c.json({ error: parsed.error.flatten() }, 400);
 		}
