@@ -422,35 +422,35 @@ Show last-updated timestamp in the status bar or footer.
 
 Used for channel filter color indicators, thumbnail backgrounds, and avatars.
 
-### JP Members
+### JPメンバー
 
-| Member Name | HEX | RGB |
-|-------------|-----|-----|
-| Kaga Sumire | `#B0C4DE` | 176, 196, 222 |
-| Kaga Nazuna | `#FABEDC` | 250, 190, 220 |
-| Kosuzume Toto | `#F5EB4A` | 255, 243, 63 |
-| Ichinose Uruha | `#4182FA` | 65, 130, 250 |
-| Kurumi Noah | `#FFDBFE` | 255, 219, 254 |
-| Tosaki Mimi | `#C7B2D6` | 199, 178, 214 |
-| Asumi Sena | `#FFFFFF` | 255, 255, 255 |
-| Tachibana Hinano | `#FA96C8` | 250, 150, 200 |
-| Hanabusa Lisa | `#D1DE79` | 209, 222, 121 |
-| Kisaragi Ren | `#BE2152` | 190, 33, 82 |
-| Kaminari Qpi | `#FFD23C` | 255, 210, 60 |
-| Yakumo Beni | `#85CAB3` | 133, 202, 179 |
-| Aizawa Ema | `#B4F1F9` | 180, 241, 249 |
-| Shinomiya Runa | `#D6ADFF` | 241, 173, 255 |
-| Nekota Tsuna | `#FF3652` | 255, 54, 82 |
-| Shiranami Ramune | `#8ECED9` | 142, 206, 217 |
-| Komori Met | `#FBA03F` | 251, 160, 63 |
-| Yumeno Akari | `#FF998D` | 255, 153, 141 |
-| Yoruno Kuromu | `#909EC8` | 144, 158, 200 |
-| Tsumugi Kokage | `#5195E1` | 81, 149, 225 |
-| Sendo Yuuhi | `#ED784A` | 237, 120, 74 |
-| Choya Hanabi | `#EA5506` | 234, 85, 6 |
-| Amayui Moka | `#ECA0AA` | 236, 160, 170 |
-| Ginjo Saine | `#58535E` | 88, 83, 94 |
-| Tatsumaki Chise | `#BEFF77` | 190, 255, 119 |
+| メンバー名 | HEX | RGB |
+|------------|-----|-----|
+| 花芽すみれ | `#B0C4DE` | 176, 196, 222 |
+| 花芽なずな | `#FABEDC` | 250, 190, 220 |
+| 小雀とと | `#F5EB4A` | 255, 243, 63 |
+| 一ノ瀬うるは | `#4182FA` | 65, 130, 250 |
+| 胡桃のあ | `#FFDBFE` | 255, 219, 254 |
+| 兎咲ミミ | `#C7B2D6` | 199, 178, 214 |
+| 空澄セナ | `#FFFFFF` | 255, 255, 255 |
+| 橘ひなの | `#FA96C8` | 250, 150, 200 |
+| 英リサ | `#D1DE79` | 209, 222, 121 |
+| 如月れん | `#BE2152` | 190, 33, 82 |
+| 神成きゅぴ | `#FFD23C` | 255, 210, 60 |
+| 八雲べに | `#85CAB3` | 133, 202, 179 |
+| 藍沢エマ | `#B4F1F9` | 180, 241, 249 |
+| 紫宮るな | `#D6ADFF` | 241, 173, 255 |
+| 猫汰つな | `#FF3652` | 255, 54, 82 |
+| 白波らむね | `#8ECED9` | 142, 206, 217 |
+| 小森めと | `#FBA03F` | 251, 160, 63 |
+| 夢野あかり | `#FF998D` | 255, 153, 141 |
+| 夜乃くろむ | `#909EC8` | 144, 158, 200 |
+| 紡木こかげ | `#5195E1` | 81, 149, 225 |
+| 千燈ゆうひ | `#ED784A` | 237, 120, 74 |
+| 蝶屋はなび | `#EA5506` | 234, 85, 6 |
+| 甘結もか | `#ECA0AA` | 236, 160, 170 |
+| 銀城サイネ | `#58535E` | 88, 83, 94 |
+| 龍巻ちせ | `#BEFF77` | 190, 255, 119 |
 
 ### EN Members
 
