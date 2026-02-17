@@ -1,0 +1,59 @@
+name: Deploy Storybook to Cloudflare Workers
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "services/web/**"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build & Deploy Storybook
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mask sensitive values
+        run: |
+          echo "::add-mask::${{ secrets.CLOUDFLARE_API_TOKEN }}"
+          echo "::add-mask::${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
+
+      - name: Install tools
+        uses: aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342
+        with:
+          aqua_version: v2.55.0
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.24.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Build Storybook
+        working-directory: services/web
+        run: pnpm storybook:build
+
+      - name: Deploy Storybook to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: services/web
+          wranglerVersion: "4.65.0"
+          command: deploy --config wrangler.storybook.jsonc
+        env:
+          WRANGLER_LOG: error
+          WRANGLER_SEND_METRICS: "false"

@@ -10,7 +10,7 @@
 		"deploy": "pnpm run build && wrangler deploy",
 		"cf-typegen": "wrangler types",
 		"storybook": "storybook dev -p 6006",
-		"build-storybook": "storybook build"
+		"storybook:build": "storybook build -o storybook-static"
 	},
 	"dependencies": {
 		"@cloudflare/vite-plugin": "^1.13.8",
@@ -31,7 +31,6 @@
 	},
 	"devDependencies": {
 		"@storybook/addon-a11y": "^10.2.8",
-		"@storybook/addon-essentials": "^8.6.14",
 		"@storybook/react": "^10.2.8",
 		"@storybook/react-vite": "^10.2.8",
 		"@tailwindcss/vite": "^4.1.18",
