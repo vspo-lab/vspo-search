@@ -25,6 +25,8 @@ export const Default: Story = {
 	args: {
 		channels: mockChannels.filter((ch) => ch.group === "JP").slice(0, 12),
 		filters: defaultFilterState,
+		onDataSourceChange: () => {},
+		onOutputModeChange: () => {},
 	},
 };
 
@@ -33,9 +35,37 @@ export const WithActiveFilters: Story = {
 		channels: mockChannels.filter((ch) => ch.group === "JP").slice(0, 12),
 		filters: {
 			selectedChannels: ["sumire", "hinano"],
+			dataSource: "all",
 			videoTypes: { stream: true, clip: false },
+			outputMode: "search",
 			dateRange: { start: "2025-01-01", end: "2025-01-31" },
 		},
+		onDataSourceChange: () => {},
+		onOutputModeChange: () => {},
+	},
+};
+
+export const YouTubeSourceOnly: Story = {
+	args: {
+		channels: mockChannels.filter((ch) => ch.group === "JP").slice(0, 12),
+		filters: {
+			...defaultFilterState,
+			dataSource: "youtube",
+		},
+		onDataSourceChange: () => {},
+		onOutputModeChange: () => {},
+	},
+};
+
+export const AnswerMode: Story = {
+	args: {
+		channels: mockChannels.filter((ch) => ch.group === "JP").slice(0, 12),
+		filters: {
+			...defaultFilterState,
+			outputMode: "answer",
+		},
+		onDataSourceChange: () => {},
+		onOutputModeChange: () => {},
 	},
 };
 
@@ -43,6 +73,8 @@ export const AllChannels: Story = {
 	args: {
 		channels: mockChannels,
 		filters: defaultFilterState,
+		onDataSourceChange: () => {},
+		onOutputModeChange: () => {},
 	},
 };
 
@@ -51,6 +83,8 @@ export const MobileOpen: Story = {
 		channels: mockChannels.filter((ch) => ch.group === "JP").slice(0, 12),
 		filters: defaultFilterState,
 		isOpen: true,
+		onDataSourceChange: () => {},
+		onOutputModeChange: () => {},
 	},
 	parameters: {
 		viewport: {

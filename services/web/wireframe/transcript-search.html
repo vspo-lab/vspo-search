@@ -242,9 +242,25 @@ h1, h2, h3 {
   gap: 20px;
 }
 
+.hero-brand {
+  font-family: var(--font-body);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.hero-brand-pop {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 .hero h1 {
-  font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
   margin-bottom: 6px;
+  color: var(--ink-soft);
 }
 
 .hero h1 .hl {
@@ -877,6 +893,15 @@ h1, h2, h3 {
   font-weight: 700;
   color: var(--accent-text);
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.answer-title svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
 }
 
 .answer-card p {
@@ -1086,6 +1111,22 @@ kbd {
   box-shadow: var(--shadow-focus);
 }
 
+/* Stagger animation for cards */
+.video-card,
+.x-card {
+  animation: card-enter var(--dur-mid) var(--ease) both;
+}
+
+.video-cards .video-card:nth-child(2) { animation-delay: 60ms; }
+.video-cards .video-card:nth-child(3) { animation-delay: 120ms; }
+.x-cards .x-card:nth-child(2) { animation-delay: 60ms; }
+.x-cards .x-card:nth-child(3) { animation-delay: 120ms; }
+
+.result-section + .result-section {
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
@@ -1095,6 +1136,13 @@ kbd {
   from {
     opacity: 0;
     transform: translateY(10px);
+  }
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
   }
 }
 
@@ -1379,7 +1427,7 @@ kbd {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         </div>
         <div>
-          <span class="brand-name">ぶいすぽサーチ</span>
+          <span class="brand-name">ぶいすぽっ!サーチ</span>
           <span class="brand-note">検索だけで終わらない、会話と分析の検索体験</span>
         </div>
       </a>
@@ -1395,6 +1443,7 @@ kbd {
   <section class="hero">
     <div class="hero-grid">
       <div>
+        <div class="hero-brand" aria-label="ぶいすぽっ!サーチ">ぶいすぽ<span class="hero-brand-pop">っ!</span>サーチ</div>
         <h1><span class="hl">あの動画</span>どこだっけ？を、その先まで。</h1>
         <p class="hero-sub">動画検索に加えて、フォローアップ回答生成と横断分析を同じ会話画面で実行。検索結果をそのまま「答え」と「比較インサイト」に変換します。</p>
         <div class="hero-features">
@@ -1621,7 +1670,7 @@ kbd {
             <section class="result-section">
               <h2 class="result-title">Follow-up Answer</h2>
               <div class="answer-card">
-                <div class="answer-title">回答: 花芽すみれが最も練習量に言及していました</div>
+                <div class="answer-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>回答: 花芽すみれが最も練習量に言及していました</div>
                 <p>抽出した5本の候補動画のうち、練習に関する直接言及の頻度と継続時間が最も高いのは花芽すみれでした。特に大会前日配信で長時間にわたる反復練習が確認できます。</p>
                 <div class="citation-list">
                   <div class="citation-item">YouTube証拠1: 花芽すみれ - 0:45:12 「大会前の練習ってほんとに緊張する」</div>

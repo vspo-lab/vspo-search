@@ -27,12 +27,19 @@ const defaultArgs = {
 	onChannelToggle: () => {},
 	onTypeToggle: () => {},
 	onDateChange: () => {},
+	onDataSourceChange: () => {},
+	onOutputModeChange: () => {},
 	isLoaded: true,
 	totalVideos: 1847,
+	totalXPosts: 5230,
 	inputValue: "",
 	onInputChange: () => {},
 	onSearch: () => {},
 	isSearchDisabled: false,
+	activeMode: "search" as const,
+	onModeChange: () => {},
+	activeSource: "all" as const,
+	onSourceChange: () => {},
 };
 
 export const InitialState: Story = {
@@ -54,6 +61,7 @@ export const Loading: Story = {
 		...defaultArgs,
 		isLoaded: false,
 		totalVideos: 0,
+		totalXPosts: 0,
 		messages: [],
 		isSearchDisabled: true,
 	},

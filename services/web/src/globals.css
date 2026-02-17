@@ -5,35 +5,48 @@
    ======================================== */
 :root {
 	/* Brand Colors */
-	--bg: #f7f6f3;
-	--accent: #e6ec49;
-	--accent-hover: #d4da2e;
+	--bg: #efede8;
+	--bg-depth: #e5e0d7;
+	--accent: #ab7d42;
+	--accent-hover: #956b35;
+	--accent-soft: #ebdbc6;
+	--accent-text: #6f4d27;
 	--beige: #cbc6be;
-	--mint: #97d5d9;
-	--orange: #f7643d;
-	--blue: #83a8f9;
 	--grey: #d9d9d9;
-	--ink: #1a1a1a;
-	--ink-soft: #3d3d3d;
-	--ink-muted: #555;
+	--ink: #202530;
+	--ink-soft: #3f4a5c;
+	--ink-muted: #667085;
 	--white: #fff;
+	--success: #3f7a57;
 
 	/* Semantic */
-	--surface: var(--white);
+	--surface: #faf8f4;
+	--surface-soft: #f3f0e9;
 	--surface-warm: rgb(203 198 190 / 0.15);
-	--border: rgb(0 0 0 / 0.08);
-	--border-strong: rgb(0 0 0 / 0.12);
+	--border: #d9d3c8;
+	--border-strong: #c4bcad;
+
+	/* Accent alpha helpers */
+	--accent-alpha-08: rgb(171 125 66 / 0.08);
+	--accent-alpha-12: rgb(171 125 66 / 0.12);
+	--accent-alpha-22: rgb(171 125 66 / 0.22);
+	--accent-alpha-30: rgb(171 125 66 / 0.3);
+	--accent-alpha-34: rgb(171 125 66 / 0.34);
+
+	/* Brand gradients */
+	--brand-grad-start: #d4bd9a;
+	--brand-grad-end: #ab7d42;
 
 	/* Shadows */
-	--shadow-card: 0 20px 40px rgb(26 26 26 / 0.08);
-	--shadow-action: 0 12px 24px rgb(26 26 26 / 0.2);
-	--shadow-hero: 0 30px 80px rgb(26 26 26 / 0.3);
-	--shadow-focus: 0 0 0 2px rgb(26 26 26 / 0.2);
+	--shadow-card: 0 16px 36px rgb(32 37 48 / 0.08);
+	--shadow-soft: 0 10px 24px rgb(32 37 48 / 0.06);
+	--shadow-action: 0 12px 24px rgb(32 37 48 / 0.15);
+	--shadow-focus: 0 0 0 3px rgb(171 125 66 / 0.32);
 
 	/* Motion */
-	--ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-	--dur-fast: 150ms;
-	--dur-md: 300ms;
+	--ease: cubic-bezier(0.22, 0.68, 0.2, 1);
+	--dur-fast: 160ms;
+	--dur-md: 280ms;
 
 	/* Member Colors — JP */
 	--c-sumire: #b0c4de;
@@ -79,12 +92,13 @@
   --color-background: var(--bg);
   --color-foreground: var(--ink);
   --color-surface: var(--surface);
+  --color-surface-soft: var(--surface-soft);
   --color-surface-warm: var(--surface-warm);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
-  --color-mint: var(--mint);
-  --color-blue: var(--blue);
-  --color-orange: var(--orange);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-text: var(--accent-text);
+  --color-success: var(--success);
   --color-beige: var(--beige);
   --color-grey: var(--grey);
   --color-ink: var(--ink);
@@ -166,7 +180,7 @@
 
 	/* Keyword highlight */
 	mark {
-		background: rgb(230 236 73 / 0.25);
+		background: var(--accent-alpha-22);
 		color: var(--ink);
 		border-radius: 2px;
 		padding: 0 1px;

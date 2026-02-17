@@ -62,8 +62,8 @@ export function VideoCardPresenter({ video }: VideoCardPresenterProps) {
 						className={cn(
 							"rounded-full border px-[7px] py-0.5 text-[0.65rem] font-bold tracking-wide",
 							video.type === "stream"
-								? "border-[rgb(151_213_217_/_0.4)] bg-[rgb(151_213_217_/_0.2)] text-[#2a7a7e]"
-								: "border-[rgb(131_168_249_/_0.4)] bg-[rgb(131_168_249_/_0.2)] text-[#3d5fb3]",
+								? "border-border bg-surface-soft text-ink-soft"
+								: "border-border bg-surface-soft text-ink-soft",
 						)}
 					>
 						{video.type === "stream" ? "配信" : "切り抜き"}
@@ -87,9 +87,9 @@ export function VideoCardPresenter({ video }: VideoCardPresenterProps) {
 								<span
 									className={cn(
 										"mt-px shrink-0 rounded-sm border px-1.5 py-px font-mono text-[0.66rem] font-bold",
-										"border-[rgb(230_236_73_/_0.3)] bg-[rgb(230_236_73_/_0.15)] text-[#6b6e0f]",
+										"border-[var(--accent-alpha-30)] bg-[var(--accent-alpha-12)] text-accent-text",
 										"transition-all duration-[var(--dur-fast)] ease-[var(--ease)]",
-										"group-hover/ts:border-accent group-hover/ts:bg-accent group-hover/ts:text-ink",
+										"group-hover/ts:border-accent group-hover/ts:bg-accent group-hover/ts:text-white",
 									)}
 								>
 									{ts.time}

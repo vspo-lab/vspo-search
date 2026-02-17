@@ -1,8 +1,11 @@
 import type {
+	AnalysisData,
 	Channel,
 	FilterState,
+	FollowUpAnswer,
 	SearchMessage,
 	VideoCard,
+	XPostCard,
 } from "../types/domain";
 
 // ========================================
@@ -198,21 +201,102 @@ export const mockVideoCards: VideoCard[] = [
 ];
 
 // ========================================
+// X Post Cards
+// ========================================
+
+export const mockXPost1: XPostCard = {
+	id: "x1",
+	authorName: "ぶいすぽ速報",
+	authorHandle: "@vspo_feed",
+	postedAt: "2025/01/14 21:03",
+	text: "CR CUP前日の練習配信、すみれさん仕上がりすごい。明日の大会かなり期待。",
+	highlightedText:
+		"CR CUP前日の<mark>練習</mark>配信、すみれさん仕上がりすごい。明日の<mark>大会</mark>かなり期待。",
+	likeCount: 2400,
+	repostCount: 410,
+	permalink: "https://x.com/vspo_feed/status/example1",
+};
+
+export const mockXPost2: XPostCard = {
+	id: "x2",
+	authorName: "大会ウォッチャー",
+	authorHandle: "@scrim_watch",
+	postedAt: "2025/01/14 22:41",
+	text: "ひなのさんの練習量もえぐい。今日の仕上がりだと大会当日が楽しみ。",
+	highlightedText:
+		"ひなのさんの<mark>練習</mark>量もえぐい。今日の仕上がりだと<mark>大会</mark>当日が楽しみ。",
+	likeCount: 1800,
+	repostCount: 255,
+	permalink: "https://x.com/scrim_watch/status/example2",
+};
+
+export const mockXPosts: XPostCard[] = [mockXPost1, mockXPost2];
+
+// ========================================
+// Follow-up Answer
+// ========================================
+
+export const mockAnswer: FollowUpAnswer = {
+	title: "回答: 花芽すみれが最も練習量に言及していました",
+	body: "抽出した5本の候補動画のうち、練習に関する直接言及の頻度と継続時間が最も高いのは花芽すみれでした。特に大会前日配信で長時間にわたる反復練習が確認できます。",
+	citations: [
+		{
+			sourceType: "youtube",
+			label: '花芽すみれ - 0:45:12 「大会前の練習ってほんとに緊張する」',
+		},
+		{
+			sourceType: "youtube",
+			label: '花芽すみれ - 2:30:05 「今日の練習で大会の作戦固まった」',
+		},
+		{
+			sourceType: "x",
+			label: "@vspo_feed 2025/01/14 21:03 「CR CUP前日の練習配信...大会かなり期待」",
+		},
+	],
+};
+
+// ========================================
+// Analysis Data
+// ========================================
+
+export const mockAnalysis: AnalysisData = {
+	cards: [
+		{ label: "Practice Mentions", value: "42" },
+		{ label: "Top Member (YouTube)", value: "花芽すみれ" },
+		{ label: "Source Share", value: "YouTube 38% / X 62%" },
+	],
+	bars: [
+		{ label: "YouTube", percentage: 38 },
+		{ label: "X", percentage: 62 },
+		{ label: "Sentiment Peak", percentage: 71 },
+	],
+};
+
+// ========================================
 // Messages (matching wireframe conversation)
 // ========================================
 
 export const mockMessages: SearchMessage[] = [
-	{ type: "user", content: "大会 練習" },
 	{
-		type: "system",
-		resultCount: 3,
-		videos: [mockVideoCard1, mockVideoCard2, mockVideoCard3],
+		type: "user",
+		content: "大会前に一番多く練習していたのは誰？根拠付きで教えて",
 	},
-	{ type: "user", content: "小森めと 雑談 おもしろ" },
 	{
 		type: "system",
-		resultCount: 2,
-		videos: [mockVideoCard4, mockVideoCard5],
+		resultCount: 8,
+		videos: [mockVideoCard1, mockVideoCard2],
+		xPosts: mockXPosts,
+		answer: mockAnswer,
+		analysis: mockAnalysis,
+		followUpActions: [
+			"比較分析を続ける",
+			"X反応を深掘り",
+			"根拠をもっと表示",
+		],
+	},
+	{
+		type: "user",
+		content: "その3人で「大会前日」と「大会当日」の差分を分析して",
 	},
 ];
 
@@ -222,10 +306,12 @@ export const mockMessages: SearchMessage[] = [
 
 export const defaultFilterState: FilterState = {
 	selectedChannels: [],
+	dataSource: "all",
 	videoTypes: {
 		stream: true,
 		clip: true,
 	},
+	outputMode: "search",
 	dateRange: {
 		start: "2025-01-01",
 		end: "2025-01-31",

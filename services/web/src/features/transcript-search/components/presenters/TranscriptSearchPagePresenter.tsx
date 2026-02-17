@@ -1,4 +1,10 @@
-import type { Channel, FilterState, SearchMessage } from "../../types/domain";
+import type {
+	Channel,
+	DataSource,
+	FilterState,
+	OutputMode,
+	SearchMessage,
+} from "../../types/domain";
 import { ChatInputPresenter } from "./ChatInputPresenter";
 import { ChatMessagePresenter } from "./ChatMessagePresenter";
 import { HeaderPresenter } from "./HeaderPresenter";
@@ -16,10 +22,13 @@ type TranscriptSearchPagePresenterProps = {
 	onChannelToggle: (channelId: string) => void;
 	onTypeToggle: (type: "stream" | "clip") => void;
 	onDateChange: (field: "start" | "end", value: string) => void;
+	onDataSourceChange: (source: DataSource) => void;
+	onOutputModeChange: (mode: OutputMode) => void;
 
 	// Status
 	isLoaded: boolean;
 	totalVideos: number;
+	totalXPosts: number;
 
 	// Chat
 	messages: SearchMessage[];
@@ -29,6 +38,10 @@ type TranscriptSearchPagePresenterProps = {
 	onInputChange: (value: string) => void;
 	onSearch: () => void;
 	isSearchDisabled: boolean;
+	activeMode: OutputMode;
+	onModeChange: (mode: OutputMode) => void;
+	activeSource: DataSource;
+	onSourceChange: (source: DataSource) => void;
 };
 
 export function TranscriptSearchPagePresenter({
@@ -40,13 +53,20 @@ export function TranscriptSearchPagePresenter({
 	onChannelToggle,
 	onTypeToggle,
 	onDateChange,
+	onDataSourceChange,
+	onOutputModeChange,
 	isLoaded,
 	totalVideos,
+	totalXPosts,
 	messages,
 	inputValue,
 	onInputChange,
 	onSearch,
 	isSearchDisabled,
+	activeMode,
+	onModeChange,
+	activeSource,
+	onSourceChange,
 }: TranscriptSearchPagePresenterProps) {
 	return (
 		<div className="flex min-h-screen flex-col">
@@ -62,6 +82,8 @@ export function TranscriptSearchPagePresenter({
 					onChannelToggle={onChannelToggle}
 					onTypeToggle={onTypeToggle}
 					onDateChange={onDateChange}
+					onDataSourceChange={onDataSourceChange}
+					onOutputModeChange={onOutputModeChange}
 				/>
 
 				<main
@@ -69,7 +91,11 @@ export function TranscriptSearchPagePresenter({
 					role="log"
 					aria-live="polite"
 				>
-					<StatusBarPresenter isLoaded={isLoaded} totalVideos={totalVideos} />
+					<StatusBarPresenter
+						isLoaded={isLoaded}
+						totalVideos={totalVideos}
+						totalXPosts={totalXPosts}
+					/>
 
 					{/* Chat messages */}
 					<div className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-6 max-md:px-4">
@@ -85,6 +111,10 @@ export function TranscriptSearchPagePresenter({
 							onChange={onInputChange}
 							onSubmit={onSearch}
 							isDisabled={isSearchDisabled}
+							activeMode={activeMode}
+							onModeChange={onModeChange}
+							activeSource={activeSource}
+							onSourceChange={onSourceChange}
 						/>
 					</div>
 				</main>

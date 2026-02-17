@@ -17,6 +17,15 @@ export const Loaded: Story = {
 	args: {
 		isLoaded: true,
 		totalVideos: 1847,
+		totalXPosts: 5230,
+	},
+};
+
+export const LoadedWithoutXPosts: Story = {
+	args: {
+		isLoaded: true,
+		totalVideos: 1847,
+		totalXPosts: 0,
 	},
 };
 
@@ -24,5 +33,6 @@ export const Loading: Story = {
 	args: {
 		isLoaded: false,
 		totalVideos: 0,
+		totalXPosts: 0,
 	},
 };
