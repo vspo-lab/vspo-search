@@ -195,11 +195,6 @@
 	@keyframes bar-fill {
 		from { width: 0% }
 	}
-	@keyframes fade-up {
-		from { opacity: 0; transform: translateY(8px) }
-		to { opacity: 1; transform: translateY(0) }
-	}
-
 	/* Keyword highlight */
 	mark {
 		background: var(--accent-alpha-22);

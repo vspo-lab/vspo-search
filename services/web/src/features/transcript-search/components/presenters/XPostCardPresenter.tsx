@@ -21,6 +21,9 @@ export function XPostCardPresenter({ post }: XPostCardPresenterProps) {
 					<span className="text-[0.76rem] font-bold text-ink">
 						{post.authorName}
 					</span>
+					<span className="text-[0.68rem] font-bold text-source-x">
+						𝕏
+					</span>
 					<span className="text-[0.68rem] text-ink-muted">
 						{post.authorHandle}
 					</span>
@@ -38,10 +41,10 @@ export function XPostCardPresenter({ post }: XPostCardPresenterProps) {
 
 			{/* Footer */}
 			<div className="mt-2 flex flex-wrap items-center gap-2 text-[0.68rem] text-ink-muted">
-				<span className="rounded-full border border-border bg-surface-soft px-2 py-0.5">
+				<span className="rounded-full border border-[rgb(29_155_240_/_0.2)] bg-surface-soft px-2 py-0.5 text-[#1270b0]">
 					Like {post.likeCount.toLocaleString()}
 				</span>
-				<span className="rounded-full border border-border bg-surface-soft px-2 py-0.5">
+				<span className="rounded-full border border-[rgb(29_155_240_/_0.2)] bg-surface-soft px-2 py-0.5 text-[#1270b0]">
 					Repost {post.repostCount.toLocaleString()}
 				</span>
 				<a
