@@ -5,35 +5,41 @@ import duckdb_wasm_eh from "@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url";
 import eh_worker from "@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url";
 
 const MANUAL_BUNDLES: duckdb.DuckDBBundles = {
-	mvp: {
-		mainModule: duckdb_wasm,
-		mainWorker: mvp_worker,
-	},
-	eh: {
-		mainModule: duckdb_wasm_eh,
-		mainWorker: eh_worker,
-	},
+	mvp: { mainModule: duckdb_wasm, mainWorker: mvp_worker },
+	eh: { mainModule: duckdb_wasm_eh, mainWorker: eh_worker },
 };
 
-let dbInstance: duckdb.AsyncDuckDB | null = null;
+let dbPromise: Promise<duckdb.AsyncDuckDB> | null = null;
 
-/** Initialize DuckDB-WASM singleton. Idempotent. */
-export async function initDuckDB(): Promise<duckdb.AsyncDuckDB> {
-	if (dbInstance) return dbInstance;
-
+async function createDuckDB(): Promise<duckdb.AsyncDuckDB> {
 	const bundle = await duckdb.selectBundle(MANUAL_BUNDLES);
-	const worker = new Worker(bundle.mainWorker!);
+	if (!bundle.mainWorker) {
+		throw new Error(
+			"DuckDB-WASM: no compatible worker bundle for this browser",
+		);
+	}
+	const worker = new Worker(bundle.mainWorker);
 	const logger = new duckdb.ConsoleLogger();
 	const db = new duckdb.AsyncDuckDB(logger, worker);
 	await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-
-	dbInstance = db;
 	return db;
+}
+
+/** Initialize DuckDB-WASM singleton. Browser-only. Concurrent-safe. */
+export function initDuckDB(): Promise<duckdb.AsyncDuckDB> {
+	if (typeof window === "undefined") {
+		throw new Error("DuckDB-WASM can only be initialized in the browser");
+	}
+	if (!dbPromise) {
+		dbPromise = createDuckDB();
+	}
+	return dbPromise;
 }
 
 /** Tear down the DuckDB instance and release resources. */
 export async function terminateDuckDB(): Promise<void> {
-	if (!dbInstance) return;
-	await dbInstance.terminate();
-	dbInstance = null;
+	if (!dbPromise) return;
+	const db = await dbPromise;
+	await db.terminate();
+	dbPromise = null;
 }

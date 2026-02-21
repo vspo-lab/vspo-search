@@ -1,27 +1,19 @@
 import type { AsyncDuckDB } from "@duckdb/duckdb-wasm";
+import type {
+	TranscriptRow,
+	TranscriptSegmentRow,
+} from "../types/parquet-schema";
 
-/** Raw search result row from the DuckDB query. */
-export type SearchResultRow = {
-	video_id: string;
-	title: string;
-	channel_id: string;
-	channel_name: string;
-	published_at: string;
-	video_type: string;
-	duration_sec: number;
-	thumbnail_url: string;
-	start_ms: number;
-	duration_ms: number;
-	text: string;
-};
+/** Raw search result row — derived from Parquet schemas. */
+export type SearchResultRow = Omit<TranscriptRow, "published_at"> &
+	TranscriptSegmentRow & { published_at: string };
 
 export type SearchParams = {
 	keyword: string;
-	videoTypes?: ("stream" | "clip")[];
-	dateFrom?: string;
-	dateTo?: string;
 	limit?: number;
 };
+
+const MAX_LIMIT = 200;
 
 /**
  * Execute an ILIKE-based transcript search.
@@ -32,21 +24,25 @@ export async function searchTranscripts(
 	db: AsyncDuckDB,
 	params: SearchParams,
 ): Promise<SearchResultRow[]> {
+	if (!params.keyword.trim()) {
+		return [];
+	}
+
 	const conn = await db.connect();
 	try {
-		const limit = params.limit ?? 50;
-		const safeKeyword = params.keyword.replace(/'/g, "''");
-
-		const result = await conn.query(`
+		const limit = Math.min(Math.max(1, params.limit ?? 50), MAX_LIMIT);
+		const stmt = await conn.prepare(`
       SELECT t.video_id, t.title, t.channel_id, t.channel_name,
-             t.published_at, t.video_type, t.duration_sec, t.thumbnail_url,
+             CAST(t.published_at AS VARCHAR) AS published_at,
+             t.video_type, t.duration_sec, t.thumbnail_url,
              s.start_ms, s.duration_ms, s.text
       FROM transcript_segments s
       JOIN transcripts t ON s.video_id = t.video_id
-      WHERE s.text ILIKE '%${safeKeyword}%'
+      WHERE s.text ILIKE '%' || ? || '%'
       ORDER BY t.published_at DESC
-      LIMIT ${limit};
+      LIMIT ?;
     `);
+		const result = await stmt.query(params.keyword, limit);
 
 		return result.toArray().map((row) => ({
 			video_id: String(row.video_id),
@@ -54,7 +50,7 @@ export async function searchTranscripts(
 			channel_id: String(row.channel_id),
 			channel_name: String(row.channel_name),
 			published_at: String(row.published_at),
-			video_type: String(row.video_type),
+			video_type: String(row.video_type) as "stream" | "clip",
 			duration_sec: Number(row.duration_sec),
 			thumbnail_url: String(row.thumbnail_url),
 			start_ms: Number(row.start_ms),

@@ -24,7 +24,7 @@ export type TranscriptSegmentRow = z.infer<typeof TranscriptSegmentRowSchema>;
 
 /** Schema for a single file entry in manifest.json */
 export const ManifestFileEntrySchema = z.object({
-	path: z.string(),
+	path: z.string().regex(/^[a-zA-Z0-9_/.-]+$/),
 	size_bytes: z.number().int(),
 	row_count: z.number().int(),
 });
