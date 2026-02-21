@@ -30,109 +30,49 @@ Review frontend code diffs or specified files based on project CSS, accessibilit
 
 **Reference**: `docs/web-frontend/css.md`
 
-| Check | Violation Example |
-|---|---|
-| Is `@apply` absent from all files? | `@apply flex items-center` in a CSS file |
-| Are there no custom classes in `@layer utilities`? | `.btn-primary { ... }` inside `@layer utilities` |
-| Are arbitrary values avoided in design-critical areas (spacing, font-size, radius, colors)? | `p-[13px]`, `text-[15px]`, `rounded-[10px]`, `bg-[#ff6b6b]` |
-| Are layout-driven calculations the only allowed arbitrary values? | `w-[calc(100%-2rem)]` is acceptable |
-| Are variants modeled with `cva`? | Inline ternary chains for 3+ visual states |
-| Are conditional classes composed with `cn()`? | Manual string concatenation for class toggling |
-| Is the `className` extension prop avoided (except shadcn wrappers)? | `interface CardProps { className?: string }` |
-| Do new colors use `oklch()` format? | Adding `#ff6b6b` or `rgb(255, 107, 107)` to CSS variables |
-| Are there no new `@keyframes` in `globals.css`? | `@keyframes fadeIn { ... }` in globals.css |
-| Are there no CSS-only class abstractions? | `.surface-panel { ... }` without component behavior |
+Key checks: no `@apply`, no custom `@layer utilities` classes, no arbitrary values in design-critical areas, use `cva` for variants, use `cn()` for conditional classes, new colors in `oklch()` format.
 
 ### 2. Design Token Compliance
 
 **Reference**: `docs/design/design-tokens.md`, `docs/web-frontend/css.md`
 
-| Check | Violation Example |
-|---|---|
-| Do colors follow the token pipeline (palette -> semantic -> component)? | Hardcoded `oklch(0.5 0.2 250)` instead of referencing a token |
-| Are Tailwind built-in colors avoided? | `bg-blue-500`, `text-gray-700` |
-| Are legacy alias tokens avoided in new code? | Using `--color-ink` instead of `--color-foreground` |
-| Do shadows use token variables? | `shadow-lg` instead of `shadow-[var(--shadow-card)]` |
-| Do motion values reference tokens? | `duration-300` instead of `var(--duration-md)` |
-| Does radius use the token scale? | `rounded-[10px]` instead of `rounded-md` |
+Key checks: colors follow token pipeline (palette -> semantic -> component), no Tailwind built-in colors, no legacy alias tokens in new code, shadows/motion/radius use token variables.
 
 ### 3. Container/Presentational Architecture
 
 **Reference**: `docs/web-frontend/architecture.md`
 
-| Check | Violation Example |
-|---|---|
-| Do Presenters receive data/callbacks via props only? | `useState` or `useEffect` inside a Presenter component |
-| Do Containers handle state, data fetching, and event logic? | API calls or `fetch` inside Presenter components |
-| Are there no cross-feature imports? | `import { X } from '@/features/other-feature'` |
-| Is the dependency direction correct (shared -> features -> app)? | Shared code importing from features |
-| Is the module structure feature-based? | Grouping by technical layer across features |
-| Are direct file imports used (no barrel files)? | `import { X } from '@/features/foo'` via index.ts |
+Key checks: Presenters receive data/callbacks via props only, Containers handle state and data fetching, no cross-feature imports, correct dependency direction (shared -> features -> app), no barrel file imports.
 
 ### 4. Accessibility (WCAG 2.2 AA)
 
 **Reference**: `docs/web-frontend/accessibility.md`, `docs/design/accessibility.md`
 
-| Check | Violation Example |
-|---|---|
-| Is semantic HTML used before custom roles? | `<div onClick={...} role="button">` instead of `<button>` |
-| Are labels associated via `htmlFor`/`id`? | `<input>` without a linked `<label>` |
-| Do icon-only buttons have `aria-label`? | `<button><SearchIcon /></button>` without `aria-label` |
-| Are touch targets >= 44x44px (minimum 24x24px)? | `h-6 w-6` button without padding |
-| Are `focus-visible` styles on interactive elements? | Buttons or links without visible focus indicator |
-| Do modals have `role="dialog"`, `aria-modal`, focus trap, Escape close? | Custom modal without ARIA attributes |
-| Is state conveyed by more than color alone? | Red text without icon or label for errors |
-| Does dynamic content use `aria-live` regions? | Status updates without `aria-live="polite"` |
-| Do informative images have meaningful `alt`? | `<img src="chart.png" alt="" />` for an informative chart |
-| Do decorative images use `alt="" aria-hidden="true"`? | Decorative SVG without `aria-hidden` |
+Key checks: semantic HTML before custom roles, labels associated via `htmlFor`/`id`, icon-only buttons have `aria-label`, touch targets >= 44x44px, `focus-visible` styles on interactive elements, modals with proper ARIA attributes and focus trap.
 
 ### 5. React Hooks & Patterns
 
 **Reference**: `docs/web-frontend/react-hooks.md`
 
-| Check | Violation Example |
-|---|---|
-| Are derived values computed during render (no `useEffect`)? | `useEffect(() => setFullName(first + last), [first, last])` |
-| Is `useMemo` used for expensive computations? | `useEffect` + `useState` for filtered lists |
-| Is event-specific logic in event handlers, not effects? | `useEffect(() => { if (submitted) notify() }, [submitted])` |
-| Are there no chained effects? | One `useEffect` setting state that triggers another `useEffect` |
-| Does data fetching use React Query or dedicated library? | Raw `fetch` inside `useEffect` without race condition handling |
-| Do external subscriptions use `useSyncExternalStore`? | Manual `addEventListener` + `useEffect` for browser APIs |
-| Do effects with subscriptions include cleanup functions? | Missing `return () => { ... }` in subscription effects |
+Key checks: derived values computed during render (no `useEffect`), `useMemo` for expensive computations, no chained effects, data fetching uses React Query, effects with subscriptions include cleanup.
 
 ### 6. Animation Policy
 
 **Reference**: `docs/web-frontend/css.md` (Animation Policy section)
 
-| Check | Violation Example |
-|---|---|
-| Are JS-driven animation libraries used (Framer Motion, React Spring, GSAP)? | CSS-only `transition` for complex multi-step animations |
-| Are there no new `@keyframes` definitions in CSS? | `@keyframes slideIn { ... }` in any CSS file |
-| Are Tailwind built-in animations used appropriately? | Custom CSS animation when `animate-spin` or `animate-pulse` would work |
-| Are existing CSS animations treated as legacy? | Adding new features that depend on legacy CSS animations |
+Key checks: JS-driven animation libraries for complex animations, no new `@keyframes` in CSS, existing CSS animations treated as legacy.
 
 ### 7. Responsive Design & Layout
 
-**Reference**: `docs/design/design-review.md`
+**Reference**: `docs/design/design-review.md` (Responsive Design Checklist)
 
-| Check | Violation Example |
-|---|---|
-| Is responsive design mobile-aware? | Desktop-only layout with no mobile breakpoints |
-| Do sticky/fixed elements avoid obscuring focused content? | `sticky top-0` header with no `scroll-padding-top` |
-| Do layouts work at 200% zoom? | Fixed pixel widths that break at zoom |
-| Is touch-friendly spacing used on mobile? | Tiny tap targets on mobile views |
-| Are responsive prefixes used consistently? | Mixing `sm:` / `md:` / `max-md:` without clear pattern |
+Key checks: mobile-aware layouts, sticky/fixed elements avoid obscuring focused content, layouts work at 200% zoom, touch-friendly spacing, consistent responsive prefixes.
 
 ### 8. Component API Design
 
-**Reference**: `docs/web-frontend/css.md`, `docs/web-frontend/architecture.md`
+**Reference**: `docs/web-frontend/css.md` (Checklist), `docs/web-frontend/architecture.md`
 
-| Check | Violation Example |
-|---|---|
-| Do components include behavior, not just style? | A component that only wraps className without event handlers |
-| Are existing shared primitives reused? | Creating a new button instead of using `shared/components/ui/Button` |
-| Do props use explicit variant types over booleans for > 2 states? | `isPrimary?: boolean; isGhost?: boolean` instead of `variant: 'primary' \| 'ghost'` |
-| Is `VariantProps<typeof variants>` used with `cva`? | Manual prop type definition duplicating `cva` variants |
+Key checks: components include behavior (not just style), existing shared primitives reused, explicit variant types over booleans for >2 states, `VariantProps<typeof variants>` used with `cva`.
 
 ---
 
@@ -173,6 +113,6 @@ Report each issue in the following format. Skip criteria with no issues.
 - `docs/web-frontend/accessibility.md` - Accessibility implementation guidelines
 - `docs/web-frontend/react-hooks.md` - React hooks best practices
 - `docs/design/design-tokens.md` - Design token architecture
-- `docs/design/design-review.md` - UI review process and checklist
+- `docs/design/design-review.md` - UI review process and responsive design checklist
 - `docs/design/design-principles.md` - Design principles (22-item checklist)
 - `docs/design/accessibility.md` - Design accessibility guidelines

@@ -105,7 +105,7 @@ Current script behavior:
 
 ## Commit Message Convention
 
-Use Angular-style commit messages:
+Use Angular-style commit messages. See `docs/common/commit-conventions.md` for full rules, types, and examples.
 
 ```text
 <type>(<scope>): <subject>
