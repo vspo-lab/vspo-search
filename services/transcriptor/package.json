@@ -18,7 +18,7 @@
 	"dependencies": {
 		"@cloudflare/containers": "0.0.30",
 		"@vspo/errors": "workspace:*",
-		"hono": "4.11.1",
+		"hono": "4.11.4",
 		"inngest": "^3",
 		"zod": "catalog:"
 	},

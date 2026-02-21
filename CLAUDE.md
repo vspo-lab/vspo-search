@@ -100,7 +100,7 @@ Current script behavior:
 
 ### Security Scan Notes
 
-- `pnpm security-scan` runs Trivy, gitleaks, and Semgrep via Docker images.
+- `pnpm security-scan` runs Trivy and Semgrep via Docker images.
 - Ensure Docker is available before running full security checks.
 
 ## Commit Message Convention

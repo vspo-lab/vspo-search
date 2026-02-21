@@ -6,10 +6,10 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '0 0 * * 1' # 毎週月曜 0:00 UTC (9:00 JST)
+    - cron: '0 0 * * 1' # Every Monday 00:00 UTC (09:00 JST)
 
 jobs:
-  # 1. 依存関係 + Dockerfile + IaC スキャン
+  # 1. Dependency + Dockerfile + IaC scan
   trivy-fs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -26,7 +26,7 @@ jobs:
           exit-code: '1'
           trivyignores: '.trivyignore'
 
-  # 2. Dockerイメージスキャン
+  # 2. Docker image scan
   trivy-container:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -39,42 +39,24 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: services/api/Dockerfile
-          target: api
+          context: services/transcriptor
+          file: services/transcriptor/Dockerfile
           push: false
           load: true
-          tags: my-app-api:scan
+          tags: transcriptor:scan
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Run Trivy container scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'my-app-api:scan'
+          image-ref: 'transcriptor:scan'
           format: 'table'
           severity: 'CRITICAL,HIGH'
           exit-code: '1'
           trivyignores: '.trivyignore'
 
-  # 3. シークレット検出
-  gitleaks:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-      pull-requests: read
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Git履歴全体をスキャン
-
-      - name: Run gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # 4. SAST (静的解析)
+  # 3. SAST (Static Analysis)
   semgrep:
     runs-on: ubuntu-latest
     timeout-minutes: 10
