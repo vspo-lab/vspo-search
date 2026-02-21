@@ -19,7 +19,7 @@ pnpm --filter @vspo/transcriptor dev  # local dev
 
 ## Architecture
 - Domain docs live in `docs/`. Read them before making architectural decisions.
-- Commit format: `<type>(<scope>): <subject>` — see commit-rules skill for details.
+- Commit format: `<type>(<scope>): <subject>` — see skills/commit-rules for scopes and full convention.
 
 ## Maintenance Notes
 <!-- This section is permanent. Do not delete. -->
