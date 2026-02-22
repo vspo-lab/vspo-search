@@ -404,11 +404,13 @@ When adding new styles:
 - [ ] No arbitrary values in design-critical areas
 - [ ] No `@apply`
 - [ ] No custom classes in `@layer utilities`
-- [ ] Components include behavior and are not CSS-only abstractions
+- [ ] Components include behavior (event handlers, state), not just className wrappers
 - [ ] Variants are modeled with `cva`
 - [ ] Conditional classes use `cn()`
 - [ ] New colors use `oklch()`
 - [ ] Existing primitives (`ActionButton`, `SurfaceCard`, `TagPill`) were considered first
+- [ ] Props use explicit variant types over booleans when there are more than 2 states
+- [ ] `VariantProps<typeof variants>` is used with `cva` for variant prop types
 
 ## References
 

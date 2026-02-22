@@ -205,6 +205,16 @@ Key items to focus on:
 - [Focus area 2]
 ```
 
+## Responsive Design Checklist
+
+When reviewing responsive design, verify the following:
+
+- [ ] Layouts are mobile-aware with appropriate breakpoints
+- [ ] Sticky/fixed elements do not obscure focused content (e.g., `scroll-padding-top` is set)
+- [ ] Layouts work correctly at 200% zoom (no fixed pixel widths that break)
+- [ ] Touch-friendly spacing is used on mobile (tap targets meet minimum size)
+- [ ] Responsive prefixes (`sm:`, `md:`, `max-md:`) are used consistently
+
 ## References
 
 - [Design Principles](./design-principles.md)

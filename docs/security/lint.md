@@ -34,3 +34,12 @@ After completing modifications, run all checks including security scan:
 ```
 
 This runs: `pnpm build`, `pnpm biome`, `pnpm knip`, `pnpm type-check`, `pnpm security-scan`
+
+## Security Review Checklist
+
+When reviewing code for security concerns, verify the following:
+
+- [ ] User input is validated before processing (Zod schemas, sanitization)
+- [ ] XSS and injection mitigations are in place (no careless `dangerouslySetInnerHTML`, parameterized queries)
+- [ ] Sensitive information (API keys, tokens, credentials) is not hardcoded in source (use environment variables)
+- [ ] OWASP Top 10 vulnerabilities are addressed (SQL injection, CSRF protections, proper authentication checks)

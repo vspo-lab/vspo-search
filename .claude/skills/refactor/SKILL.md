@@ -10,24 +10,17 @@ Refactor code to improve maintainability and simplicity without changing externa
 
 ## Principles
 
-### Common
+Follow the architecture and modeling conventions defined in the project docs.
 
-- Keep method names primitive and single-purpose. Avoid compound action names like `fetchAndSave`.
-- Avoid unnecessary sharing and wrappers. If direct usage is enough, do not add extra layers.
-- Keep the codebase as small as possible while preserving clarity and correctness.
-- Add meaningful comments where intent is not obvious. Do not add trivial comments.
-- Respect Clean Architecture + DDD dependency direction: `Infra -> UseCase -> Domain`.
+**References**:
+- `docs/backend/server-architecture.md` - Layer boundaries, dependency direction, DIP
+- `docs/backend/domain-modeling.md` - Aggregate boundaries, repository design, naming
 
-### UseCase
-
-- Keep UseCases simple and orchestration-focused.
-- Concentrate business logic in the Domain layer.
-
-### Domain and Repository
-
-- Repositories are responsible for persistence at aggregate boundaries.
-- Treat objects with the same lifecycle as one aggregate.
-- Perform create, update, delete, and get operations at aggregate level.
+Key rules:
+- Respect one-way dependency direction: `Infra -> UseCase -> Domain`
+- Keep UseCases as thin orchestrators; concentrate logic in Domain
+- Remove unnecessary wrappers and sharing; prefer direct usage
+- Add meaningful comments only where intent is non-obvious
 
 ## Execution Steps
 
@@ -37,4 +30,3 @@ Refactor code to improve maintainability and simplicity without changing externa
 4. Re-check layer boundaries and dependency direction.
 5. Add or update meaningful comments only where needed.
 6. Run validation commands (`type-check`, `build`, tests, or `post-edit-check`) and report results.
-
