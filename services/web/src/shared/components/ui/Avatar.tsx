@@ -1,36 +1,47 @@
-import type { Member } from "@/shared/lib/members";
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/shared/lib/utils";
 
-const sizeMap = {
-	xs: "w-7 h-7 text-[0.65rem]",
-	sm: "w-9 h-9 text-xs",
-	md: "w-11 h-11 text-sm",
-	lg: "w-20 h-20 text-2xl",
-	xl: "w-40 h-40 text-5xl",
-} as const;
+const avatarVariants = cva(
+	"inline-flex items-center justify-center rounded-full font-bold select-none shrink-0",
+	{
+		variants: {
+			size: {
+				sm: "h-9 w-9 text-[13px]",
+				md: "h-11 w-11 text-[15px]",
+				lg: "h-20 w-20 text-[32px]",
+			},
+		},
+		defaultVariants: {
+			size: "md",
+		},
+	},
+);
 
-type AvatarProps = {
-	member: Member;
-	size: keyof typeof sizeMap;
+type AvatarProps = VariantProps<typeof avatarVariants> & {
+	char: string;
+	bgColor: string;
+	hasRing?: boolean;
 	className?: string;
 };
 
-export function Avatar({ member, size, className }: AvatarProps) {
-	const needsBorder = member.id === "sena";
-
+export function Avatar({
+	size,
+	char,
+	bgColor,
+	hasRing = false,
+	className,
+}: AvatarProps) {
 	return (
 		<div
 			className={cn(
-				"rounded-full flex items-center justify-center font-bold shrink-0 select-none",
-				sizeMap[size],
-				needsBorder && "border border-border",
-				member.avatarTextColor === "dark" ? "text-ink" : "text-white",
+				avatarVariants({ size }),
+				hasRing && "shadow-[var(--shadow-avatar-ring)]",
+				size === "lg" && hasRing && "shadow-[var(--shadow-profile-avatar)]",
 				className,
 			)}
-			style={{ backgroundColor: member.color }}
-			aria-label={member.name}
+			style={{ backgroundColor: bgColor, color: "#FFFFFF" }}
 		>
-			{member.initial}
+			{char}
 		</div>
 	);
 }

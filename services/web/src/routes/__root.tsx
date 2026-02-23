@@ -1,13 +1,6 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import {
-	Outlet,
-	createRootRoute,
-	HeadContent,
-	Scripts,
-} from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { AppShell } from "@/shared/components/layout/AppShell";
-import { mockClips, mockPlaylists } from "@/features/voice-collection/__mocks__/fixtures";
 
 import appCss from "../globals.css?url";
 
@@ -22,7 +15,7 @@ export const Route = createRootRoute({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "ぶいすぽコレクション（音声）",
+				title: "ぶいすぽコレクション",
 			},
 		],
 		links: [
@@ -37,7 +30,7 @@ export const Route = createRootRoute({
 			},
 			{
 				rel: "stylesheet",
-				href: "https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&family=Shippori+Mincho+B1:wght@600;700&display=swap",
+				href: "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap",
 			},
 			{
 				rel: "stylesheet",
@@ -47,7 +40,6 @@ export const Route = createRootRoute({
 	}),
 
 	shellComponent: RootDocument,
-	component: RootLayout,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -72,13 +64,5 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<Scripts />
 			</body>
 		</html>
-	);
-}
-
-function RootLayout() {
-	return (
-		<AppShell playlist={mockClips} playlists={mockPlaylists}>
-			<Outlet />
-		</AppShell>
 	);
 }

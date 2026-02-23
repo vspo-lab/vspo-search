@@ -4,50 +4,54 @@
    BASE PALETTE (CSS Custom Properties)
    ======================================== */
 :root {
-	/* Brand Colors */
-	--bg: #F7F6F3;
-	--accent: #ab7d42;
-	--accent-hover: #956b35;
-	--accent-soft: #ebdbc6;
-	--accent-text: #6f4d27;
-	--accent-bg: #f5efe6;
-	--beige: #cbc6be;
-	--grey: #d9d9d9;
-	--ink: #202530;
-	--ink-soft: #6B6560;
-	--ink-muted: #9B9690;
-	--ink-faint: #C5C0BA;
-	--white: #fff;
-	--success: #3f7a57;
+	/* Primary */
+	--primary: #B8A9E8;
+	--primary-hover: #A494D8;
+	--primary-soft: #F9F7FE;
+	--primary-bg: #F5F0FA;
 
-	/* Like / Status */
-	--like-color: #e05c6c;
-	--like-bg: #fce8eb;
+	/* Backgrounds */
+	--bg: #FFFFFF;
+	--bg-body: #FAFAFA;
 
-	/* Semantic */
-	--surface: #FFFFFF;
-	--surface-soft: #f3f0e9;
-	--surface-warm: rgb(203 198 190 / 0.15);
-	--border: #E8E5E0;
-	--border-strong: #c4bcad;
+	/* Text */
+	--text-primary: #333333;
+	--text-secondary: #666666;
+	--text-muted: #888888;
+	--text-disabled: #AAAAAA;
+	--text-inactive-tab: #BBBBBB;
+	--icon-inactive: #CCCCCC;
 
-	/* Accent alpha helpers */
-	--accent-alpha-08: rgb(171 125 66 / 0.08);
-	--accent-alpha-12: rgb(171 125 66 / 0.12);
-	--accent-alpha-22: rgb(171 125 66 / 0.22);
-	--accent-alpha-30: rgb(171 125 66 / 0.3);
-	--accent-alpha-34: rgb(171 125 66 / 0.34);
+	/* Surfaces */
+	--surface-chip: #F5F5F5;
+	--surface-highlight: #F9F7FE;
+	--surface-member-avatar: #F5F0FA;
+
+	/* Borders */
+	--border-separator: #F0F0F0;
+	--border-card: #F5F5F5;
+
+	/* Playlist featured */
+	--playlist-featured-border: #FCE4EC;
 
 	/* Shadows */
-	--shadow-card: 0 16px 36px rgb(32 37 48 / 0.08);
-	--shadow-soft: 0 10px 24px rgb(32 37 48 / 0.06);
-	--shadow-action: 0 12px 24px rgb(32 37 48 / 0.15);
-	--shadow-focus: 0 0 0 3px rgb(171 125 66 / 0.32);
+	--shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
+	--shadow-tab-bar: 0 -2px 12px rgba(0, 0, 0, 0.06);
+	--shadow-avatar-ring: 0 0 0 3px rgba(184, 169, 232, 0.3);
+	--shadow-profile-avatar: 0 4px 16px rgba(212, 168, 232, 0.3);
 
 	/* Motion */
 	--ease: cubic-bezier(0.22, 0.68, 0.2, 1);
 	--dur-fast: 160ms;
 	--dur-md: 280ms;
+
+	/* Member avatar colors (from Figma) */
+	--avatar-purple: #D4A8E8;
+	--avatar-blue: #A8D8EA;
+	--avatar-pink: #E8B8D4;
+	--avatar-orange: #F5D0A8;
+	--avatar-green: #B8E8C8;
+	--avatar-light-blue: #A8C8E8;
 
 	/* Member Colors — JP */
 	--c-sumire: #b0c4de;
@@ -90,40 +94,33 @@
    ======================================== */
 @theme {
   /* Colors */
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-bg: var(--primary-bg);
   --color-background: var(--bg);
-  --color-foreground: var(--ink);
-  --color-surface: var(--surface);
-  --color-surface-soft: var(--surface-soft);
-  --color-surface-warm: var(--surface-warm);
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-accent-soft: var(--accent-soft);
-  --color-accent-text: var(--accent-text);
-  --color-accent-bg: var(--accent-bg);
-  --color-success: var(--success);
-  --color-beige: var(--beige);
-  --color-grey: var(--grey);
-  --color-ink: var(--ink);
-  --color-ink-soft: var(--ink-soft);
-  --color-ink-muted: var(--ink-muted);
-  --color-ink-faint: var(--ink-faint);
-  --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-  --color-like: var(--like-color);
-  --color-like-bg: var(--like-bg);
+  --color-background-body: var(--bg-body);
+  --color-foreground: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-inactive: var(--text-inactive-tab);
+  --color-icon-inactive: var(--icon-inactive);
+  --color-surface-chip: var(--surface-chip);
+  --color-surface-highlight: var(--surface-highlight);
+  --color-border-separator: var(--border-separator);
+  --color-border-card: var(--border-card);
 
   /* Typography */
-  --font-body: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", "Yu Gothic",
-    "Noto Sans JP", sans-serif;
-  --font-display: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho",
-    serif;
+  --font-body: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
 
   /* Radius */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.875rem;
-  --radius-lg: 1.25rem;
-  --radius-xl: 1.5rem;
-  --radius-2xl: 2rem;
+  --radius-chip: 20px;
+  --radius-avatar-sm: 18px;
+  --radius-avatar-md: 22px;
+  --radius-avatar-lg: 40px;
+  --radius-card: 12px;
+  --radius-playlist-card: 16px;
   --radius-full: 9999px;
 }
 
@@ -143,19 +140,11 @@
 
 	body {
 		font-family: var(--font-body);
-		background: var(--color-background);
-		color: var(--color-foreground);
+		background: var(--bg-body);
+		color: var(--text-primary);
 		line-height: 1.6;
 		min-height: 100vh;
 		overflow-x: hidden;
-	}
-
-	h1,
-	h2,
-	h3,
-	h4 {
-		font-family: var(--font-display);
-		line-height: 1.5;
 	}
 
 	button,
@@ -171,11 +160,5 @@
 	a {
 		color: inherit;
 		text-decoration: none;
-	}
-
-	/* Keyframes */
-	@keyframes playing-bar {
-		0%, 100% { height: 20%; }
-		50% { height: 100%; }
 	}
 }
