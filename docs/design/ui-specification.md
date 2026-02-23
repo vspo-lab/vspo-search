@@ -4,8 +4,9 @@
 
 - Target: Voice clip collection app for Vspo fans
 - MVP scope:
-  - Home (clip browsing, popular/new tabs, member filter)
+  - Home (clip browsing, popular/new tabs, member filter, category filter)
   - Member detail (per-member clip list)
+  - Category detail (per-category clip list)
   - Playlist (curated lists, favorites)
   - Add voice (UGC clip submission from YouTube)
   - Merge & download (combine clips, export audio)
@@ -49,7 +50,20 @@
 | Section | Items |
 |---------|-------|
 | Main nav | Home, Member, Add voice |
+| Categories | 挨拶, リアクション, 決め台詞, 叫び, 笑い, 歌, ゲーム, 日常 |
 | Playlists | Favorites, custom playlists, + New |
+
+### Route Map
+
+| Route | Screen |
+|-------|--------|
+| `/` | Home (clip feed) |
+| `/member` | Member list |
+| `/member/{memberId}` | Member detail |
+| `/category/{slug}` | Category detail |
+| `/playlist` | Playlist management |
+| `/add` | UGC submission |
+| `/merge` | Merge & download |
 
 ### Figma File
 
@@ -63,14 +77,18 @@ Design mockups: [Figma](https://www.figma.com/design/84XQRkIqqgbIfuILBe7G2E)
 - **Layout**: Mobile list / Desktop table with sidebar
 - **Key elements**:
   - Tabs: Popular / New
-  - Member filter chips (horizontal scroll on mobile)
+  - Category chips (horizontal scroll on mobile, below tabs)
+  - Member filter chips (horizontal scroll on mobile, below category chips)
+  - Active filter display: removable chips above clip list when filters are applied
   - Clip list: Avatar + title + member name + duration + like count
   - Playing state: Highlighted row with inline progress bar
   - Mini player bar (mobile) / Full player bar (desktop)
+- **Filter composition**: Category + Member + Sort work as AND filters. URL state: `?category={slug}&member={id}&sort=popular|new`. "All" is the default for both category and member.
 - **Interactions**:
   - Tap clip to play
   - Tap heart to like/unlike
-  - Swipe chips to filter by member
+  - Swipe chips to filter by category or member
+  - Tap active filter chip to remove that filter
 
 ### 4.2 Member Detail
 
@@ -101,12 +119,19 @@ Design mockups: [Figma](https://www.figma.com/design/84XQRkIqqgbIfuILBe7G2E)
 - **Key elements**:
   - Source toggle: YouTube URL / File upload
   - YouTube URL input with hint text
-  - Time range picker: Start / End (format `H:MM:SS`)
+  - Time range picker: Start / End (format `H:MM:SS`, max 30 seconds)
   - Member dropdown with avatar preview
+  - Category dropdown (required, selects from predefined categories)
   - Title input with character count (max 50)
   - Preview card: Avatar + title + duration + play button
   - Submit button
 - **Desktop extras**: Tips card with submission guidelines
+- **My Submissions sub-view**:
+  - Accessible via tab or link within Add Voice screen
+  - Lists past submissions (tracked via localStorage submission IDs)
+  - Each row: Title, member avatar, status badge, submitted date
+  - Status badges: Pending (yellow `--warning`), Approved (green `--success`), Rejected (red `--error`)
+  - Rejected items: expandable detail showing rejection reason
 
 ### 4.5 Merge & Download
 
@@ -121,6 +146,20 @@ Design mockups: [Figma](https://www.figma.com/design/84XQRkIqqgbIfuILBe7G2E)
   - Format selector: MP3 / WAV / OGG with estimated file sizes
   - Action buttons: Download, Save as playlist
 - **Total info bar**: Clip count + total duration
+
+### 4.6 Category Detail
+
+- **Purpose**: Browse all clips within a specific category
+- **Layout**: Category header + filtered clip list (same layout as Home)
+- **Key elements**:
+  - Back navigation
+  - Category header: Lucide icon + category name (Japanese) + total clip count
+  - Sort control: Popular / Newest
+  - Member filter chips (filter within category)
+  - Clip list: same components as Home (ClipListPresenter / ClipTablePresenter)
+- **Responsive**:
+  - Mobile: icon + name inline, clip list below
+  - Desktop: icon + name + count as page header, table layout
 
 ## 5. Shared UI Components
 
@@ -166,6 +205,20 @@ Member initial character in a colored circle using the member's brand color.
 - Default: `--surface` bg, `--border` stroke, `--ink-soft` text
 - Active: `--accent` bg, white text
 
+### Category Chips
+
+- Variant of Chip with a small Lucide icon (16px) before the label
+- Default: `--surface` bg, icon + text in `--ink-soft`
+- Active: `--accent` bg, white icon + text
+- "All" chip at the start of the row (no icon)
+
+### Status Badges
+
+- Pending: `--warning` bg (yellow), dark text, "審査中" label
+- Approved: `--success` bg (green), dark text, "承認済み" label
+- Rejected: `--error` bg (red), white text, "却下" label
+- Size: inline badge (padding 2px 8px, border-radius 4px, font-size 12px)
+
 ### Cards
 
 - Background: `--surface`
@@ -174,6 +227,18 @@ Member initial character in a colored circle using the member's brand color.
 - Favorites variant: gradient from `--like-bg` to white
 
 ## 6. State Management (UI)
+
+### Filter State
+
+- Category, member, and sort filters stored as URL search params via TanStack Router
+- Pattern: `?category={slug}&member={memberId}&sort=popular`
+- Default: no params = all categories, all members, popular sort
+- Filter state preserved during in-app navigation; reset on Home logo tap
+
+### Submission Tracking State
+
+- Submitted clip IDs stored in localStorage (key: `vspo-voice-submissions`)
+- Used to display "My Submissions" list with status polling
 
 ### Playing State
 
@@ -189,7 +254,9 @@ Member initial character in a colored circle using the member's brand color.
 ### Empty States
 
 - No clips: Illustration-free message with CTA to add voice
+- No clips in category: "このカテゴリにはまだクリップがありません" message
 - No playlists: Prompt to create first playlist
+- No submissions: Prompt to submit first clip
 
 ### Error States
 
@@ -204,6 +271,8 @@ Member initial character in a colored circle using the member's brand color.
 | Clip display | Vertical list | Table with columns |
 | Player | Mini player above tabs | Full player bar at bottom |
 | Playlists | Stacked cards | 2-column grid |
+| Category chips | Horizontal scroll row | Sidebar section (collapsible) |
+| Category detail | Icon + name header, list | Icon + name + count header, table |
 | Add voice | Single form | Two-column with preview panel |
 | Merge | Sequential list | Two-column with preview panel |
 
@@ -227,6 +296,7 @@ Member initial character in a colored circle using the member's brand color.
 
 ## References
 
+- [Voice Collection Domain Requirements](../domain/voice-collection.md)
 - [Color Guidelines](./colors.md)
 - [Design Tokens](./design-tokens.md)
 - [Typography Guidelines](./typography.md)
