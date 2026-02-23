@@ -9,12 +9,37 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PlaylistRouteImport } from './routes/playlist'
+import { Route as MergeRouteImport } from './routes/merge'
+import { Route as MemberRouteImport } from './routes/member'
+import { Route as AddRouteImport } from './routes/add'
 import { Route as CollectionRouteImport } from './routes/_collection'
 import { Route as CollectionIndexRouteImport } from './routes/_collection/index'
+import { Route as MemberMemberIdRouteImport } from './routes/member.$memberId'
 import { Route as CollectionListsRouteImport } from './routes/_collection/lists'
 import { Route as CollectionMembersIndexRouteImport } from './routes/_collection/members/index'
 import { Route as CollectionMembersMemberIdRouteImport } from './routes/_collection/members/$memberId'
 
+const PlaylistRoute = PlaylistRouteImport.update({
+  id: '/playlist',
+  path: '/playlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MergeRoute = MergeRouteImport.update({
+  id: '/merge',
+  path: '/merge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemberRoute = MemberRouteImport.update({
+  id: '/member',
+  path: '/member',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AddRoute = AddRouteImport.update({
+  id: '/add',
+  path: '/add',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CollectionRoute = CollectionRouteImport.update({
   id: '/_collection',
   getParentRoute: () => rootRouteImport,
@@ -23,6 +48,11 @@ const CollectionIndexRoute = CollectionIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CollectionRoute,
+} as any)
+const MemberMemberIdRoute = MemberMemberIdRouteImport.update({
+  id: '/$memberId',
+  path: '/$memberId',
+  getParentRoute: () => MemberRoute,
 } as any)
 const CollectionListsRoute = CollectionListsRouteImport.update({
   id: '/lists',
@@ -43,12 +73,22 @@ const CollectionMembersMemberIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof CollectionIndexRoute
+  '/add': typeof AddRoute
+  '/member': typeof MemberRouteWithChildren
+  '/merge': typeof MergeRoute
+  '/playlist': typeof PlaylistRoute
   '/lists': typeof CollectionListsRoute
+  '/member/$memberId': typeof MemberMemberIdRoute
   '/members/$memberId': typeof CollectionMembersMemberIdRoute
   '/members/': typeof CollectionMembersIndexRoute
 }
 export interface FileRoutesByTo {
+  '/add': typeof AddRoute
+  '/member': typeof MemberRouteWithChildren
+  '/merge': typeof MergeRoute
+  '/playlist': typeof PlaylistRoute
   '/lists': typeof CollectionListsRoute
+  '/member/$memberId': typeof MemberMemberIdRoute
   '/': typeof CollectionIndexRoute
   '/members/$memberId': typeof CollectionMembersMemberIdRoute
   '/members': typeof CollectionMembersIndexRoute
@@ -56,20 +96,48 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_collection': typeof CollectionRouteWithChildren
+  '/add': typeof AddRoute
+  '/member': typeof MemberRouteWithChildren
+  '/merge': typeof MergeRoute
+  '/playlist': typeof PlaylistRoute
   '/_collection/lists': typeof CollectionListsRoute
+  '/member/$memberId': typeof MemberMemberIdRoute
   '/_collection/': typeof CollectionIndexRoute
   '/_collection/members/$memberId': typeof CollectionMembersMemberIdRoute
   '/_collection/members/': typeof CollectionMembersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/lists' | '/members/$memberId' | '/members/'
+  fullPaths:
+    | '/'
+    | '/add'
+    | '/member'
+    | '/merge'
+    | '/playlist'
+    | '/lists'
+    | '/member/$memberId'
+    | '/members/$memberId'
+    | '/members/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/lists' | '/' | '/members/$memberId' | '/members'
+  to:
+    | '/add'
+    | '/member'
+    | '/merge'
+    | '/playlist'
+    | '/lists'
+    | '/member/$memberId'
+    | '/'
+    | '/members/$memberId'
+    | '/members'
   id:
     | '__root__'
     | '/_collection'
+    | '/add'
+    | '/member'
+    | '/merge'
+    | '/playlist'
     | '/_collection/lists'
+    | '/member/$memberId'
     | '/_collection/'
     | '/_collection/members/$memberId'
     | '/_collection/members/'
@@ -77,10 +145,42 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   CollectionRoute: typeof CollectionRouteWithChildren
+  AddRoute: typeof AddRoute
+  MemberRoute: typeof MemberRouteWithChildren
+  MergeRoute: typeof MergeRoute
+  PlaylistRoute: typeof PlaylistRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/playlist': {
+      id: '/playlist'
+      path: '/playlist'
+      fullPath: '/playlist'
+      preLoaderRoute: typeof PlaylistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merge': {
+      id: '/merge'
+      path: '/merge'
+      fullPath: '/merge'
+      preLoaderRoute: typeof MergeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/member': {
+      id: '/member'
+      path: '/member'
+      fullPath: '/member'
+      preLoaderRoute: typeof MemberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/add': {
+      id: '/add'
+      path: '/add'
+      fullPath: '/add'
+      preLoaderRoute: typeof AddRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_collection': {
       id: '/_collection'
       path: ''
@@ -94,6 +194,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof CollectionIndexRouteImport
       parentRoute: typeof CollectionRoute
+    }
+    '/member/$memberId': {
+      id: '/member/$memberId'
+      path: '/$memberId'
+      fullPath: '/member/$memberId'
+      preLoaderRoute: typeof MemberMemberIdRouteImport
+      parentRoute: typeof MemberRoute
     }
     '/_collection/lists': {
       id: '/_collection/lists'
@@ -137,8 +244,23 @@ const CollectionRouteWithChildren = CollectionRoute._addFileChildren(
   CollectionRouteChildren,
 )
 
+interface MemberRouteChildren {
+  MemberMemberIdRoute: typeof MemberMemberIdRoute
+}
+
+const MemberRouteChildren: MemberRouteChildren = {
+  MemberMemberIdRoute: MemberMemberIdRoute,
+}
+
+const MemberRouteWithChildren =
+  MemberRoute._addFileChildren(MemberRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   CollectionRoute: CollectionRouteWithChildren,
+  AddRoute: AddRoute,
+  MemberRoute: MemberRouteWithChildren,
+  MergeRoute: MergeRoute,
+  PlaylistRoute: PlaylistRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
