@@ -1,13 +1,11 @@
-## Summary
+## 現状
+<!-- 変更前の状態を簡潔に -->
 
-<!-- What does this PR do? -->
+## 問題
+<!-- このまま変更しない場合に起きる問題 -->
 
-## Changes
+## 実装内容
+<!-- 何をどう変更したかを箇条書きで -->
 
--
-
-## Test Plan
-
-- [ ] Unit tests pass
-- [ ] Type check passes
-- [ ] Lint passes
+## 影響範囲
+<!-- 他モジュールへの影響があれば記載 -->

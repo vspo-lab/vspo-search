@@ -1,144 +1,57 @@
-# Color Guidelines
+# カラーガイドライン
 
-## Overview
+## 概要
 
-The color palette defines the visual identity for ぶいすぽコレクション. It combines a warm neutral base with an amber accent and per-member brand colors.
+カラーパレットは、ブランドの視覚的アイデンティティを構成する重要な要素です。一貫したカラー使用により、ユーザーに統一感のある体験を提供します。
 
-## Brand Colors
+## ブランドカラー
 
-| Name | HEX | CSS Variable | Usage |
-|------|-----|-------------|-------|
-| Off-White | `#F7F6F3` | `--bg` | Background / base color |
-| Amber | `#ab7d42` | `--accent` | Primary accent / CTA / active states |
+プロジェクトに合わせてブランドカラーを定義してください。
 
-### Off-White (Background)
+| 名称 | HEX | 用途 |
+|------|-----|------|
+| Background | `#FFFFFF` | 背景・ベースカラー |
+| Accent | `#000000` | アクセント・強調 |
 
-The warm off-white gives a soft and approachable impression. Used as the main canvas.
+## セカンダリカラー
 
-```css
---bg: #F7F6F3;
-```
+ブランドカラーを補完し、UIのバリエーションを豊かにするカラーを定義してください。
 
-### Amber (Accent)
+## カラー使用ルール
 
-Used for CTA buttons, active tabs, progress bars, and interactive highlights. Provides warmth without harshness.
+### コントラスト比の考慮
 
-```css
---accent: #ab7d42;
---accent-hover: #956b35;
---accent-soft: #ebdbc6;  /* Soft tint for backgrounds */
---accent-bg: #f5efe6;    /* Very light tint for hover/selected rows */
-```
+アクセシビリティを確保するため、テキストと背景のコントラスト比は以下を満たす必要があります：
 
-## Semantic Colors
+| 対象 | 最小コントラスト比 |
+|------|-------------------|
+| 通常テキスト（14px未満） | 4.5:1 以上 |
+| 大きなテキスト（18px以上、または14px以上のボールド） | 3:1 以上 |
+| UIコンポーネント・グラフィック | 3:1 以上 |
 
-| Name | HEX | CSS Variable | Usage |
-|------|-----|-------------|-------|
-| Surface | `#FFFFFF` | `--surface` | Cards, panels, overlays |
-| Border | `#E8E5E0` | `--border` | Standard borders |
-| Border Light | `#F0EDE8` | `--border-light` | Subtle dividers |
-| Ink | `#202530` | `--ink` | Primary text |
-| Ink Soft | `#6B6560` | `--ink-soft` | Secondary text |
-| Ink Muted | `#9B9690` | `--ink-muted` | Placeholder, metadata |
-| Ink Faint | `#C5C0BA` | `--ink-faint` | Disabled, inactive icons |
+### カラーの組み合わせ
 
-## Status Colors
+#### 推奨される組み合わせ
 
-| Name | HEX | CSS Variable | Usage |
-|------|-----|-------------|-------|
-| Like | `#e05c6c` | `--like-color` | Liked hearts, favorite indicators |
-| Like Background | `#fce8eb` | `--like-bg` | Favorite card tints |
-| Success | `#3f7a57` | `--success` | Positive actions, merge icon |
+| 背景 | テキスト/前景 | 用途 |
+|------|--------------|------|
+| Background色 | ダークグレー/ブラック | 本文テキスト |
+| Accent色 | ダークテキスト | CTAボタン |
 
-## Member Brand Colors
+#### 避けるべき組み合わせ
 
-Each Vspo member has an official brand color used for avatars, hero gradients, and personalized UI accents. Defined in `design-tokens.ts` and exposed as CSS custom properties.
+- 明るい背景色に白テキスト（コントラスト不足）
+- 類似色相の組み合わせ（色の区別が困難）
 
-| Member | HEX | CSS Variable | Avatar Text |
-|--------|-----|-------------|-------------|
-| 花芽すみれ | `#B0C4DE` | `--c-sumire` | Dark |
-| 花芽なずな | `#FABEDC` | `--c-nazuna` | Dark |
-| 小雀とと | `#F5EB4A` | `--c-toto` | Dark |
-| 一ノ瀬うるは | `#4182FA` | `--c-uruha` | Light |
-| 胡桃のあ | `#FFDBFE` | `--c-noa` | Dark |
-| 兎咲ミミ | `#C7B2D6` | `--c-mimi` | Dark |
-| 空澄セナ | `#FFFFFF` | `--c-sena` | Dark (+ border) |
-| 橘ひなの | `#FA96C8` | `--c-hinano` | Dark |
-| 八雲べに | `#85CAB3` | `--c-beni` | Dark |
-| 藍沢エマ | `#B4F1F9` | `--c-emma` | Dark |
-| 紫宮るな | `#D6ADFF` | `--c-runa` | Light |
-| 白波らむね | `#8ECED9` | `--c-ramune` | Dark |
-| 小森めと | `#FBA03F` | `--c-met` | Light |
-| 神成きゅぴ | `#FFD23C` | `--c-kyupi` | Dark |
-| 如月れん | `#BE2152` | `--c-ren` | Light |
-| 英リサ | `#D1DE79` | `--c-lisa` | Dark |
-| 綾瀬つな | `#FF3652` | `--c-tsuna` | Light |
-| 夜乃くろむ | `#909EC8` | `--c-kuromu` | Dark |
-| 木暮ゆうひ | `#ED784A` | `--c-yuuhi` | Light |
-| 花鋏キョウ | `#FF998D` | `--c-akari` | Dark |
-| 小柳こかげ | `#5195E1` | `--c-kokage` | Light |
-| 夢野はなび | `#EA5506` | `--c-hanabi` | Light |
-| 甘城もか | `#ECA0AA` | `--c-moka` | Dark |
-| 瀬名セイネ | `#58535E` | `--c-seine` | Light |
-| 千草ちせ | `#BEFF77` | `--c-chise` | Dark |
+## 禁止事項
 
-### Avatar Text Color Rule
+- パレット外のカラーの無断使用
+- ブランドカラーの変形（透明度の過度な変更、グラデーションへの変換等）
+- コントラスト比を満たさない組み合わせでのテキスト表示
+- 色のみで情報を伝えること（形状やテキストも併用する）
 
-- **Dark text** (`avatar-dark-text`): Use when the member color is light (L > 0.7 in OKLch)
-- **Light text** (`avatar-light-text`): Use when the member color is dark (L <= 0.7)
-- **セナ exception**: White background requires `border: 1px solid var(--border)` for visibility
+## 参考リンク
 
-### Member Color Usage
-
-```css
-/* Avatar circle */
-.avatar { background: var(--c-sumire); }
-
-/* Hero gradient (member detail page) */
-.hero { background: linear-gradient(180deg,
-  color-mix(in srgb, var(--c-sumire) 25%, var(--bg)) 0%,
-  var(--bg) 100%); }
-
-/* Avatar shadow */
-.avatar-lg { box-shadow: 0 8px 32px color-mix(in srgb, var(--c-sumire) 30%, transparent); }
-```
-
-## Color Usage Rules
-
-### Priority
-
-1. **Background**: Use off-white `#F7F6F3` as the base
-2. **Accent**: Use amber `#ab7d42` for primary CTAs and active states
-3. **Member colors**: Use per-member brand colors for avatars and personalization
-4. **Status**: Use like/success colors for contextual feedback
-
-### Contrast Ratio Considerations
-
-| Target | Minimum Contrast Ratio |
-|--------|----------------------|
-| Normal text (under 14px) | 4.5:1 or higher |
-| Large text (18px+, or 14px+ bold) | 3:1 or higher |
-| UI components / graphics | 3:1 or higher |
-
-### Recommended Combinations
-
-| Background | Text / Foreground | Usage |
-|------------|-------------------|-------|
-| Off-White (`--bg`) | Ink (`--ink`) | Body text |
-| Amber (`--accent`) | White `#FFF` | CTA buttons |
-| Accent-bg (`--accent-bg`) | Ink (`--ink`) | Selected/playing rows |
-| Member color | Dark or light text | Member avatars |
-
-## Prohibited Practices
-
-- Using colors outside the palette without approval
-- Altering brand colors (opacity changes, gradient conversions, etc.)
-- Displaying text with color combinations that fail contrast ratio requirements
-- Conveying information through color alone (always supplement with shape or text)
-- Using emoji or Unicode symbols as icons (use SVG Lucide-style icons)
-
-## References
-
-- [Accessibility Guidelines](./accessibility.md)
-- [Design Tokens](./design-tokens.md)
+- [アクセシビリティガイドライン](./accessibility.md)
+- [デザイントークン](./design-tokens.md)
 - [Contrast Checker - WebAIM](https://webaim.org/resources/contrastchecker/)

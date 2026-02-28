@@ -1,55 +1,53 @@
-# Tailwind CSS Guidelines
+# Tailwind CSS ガイドライン
 
-## Core Principles
+## 基本原則
 
-### Utility-First Mindset
+### ユーティリティファーストの思想
 
-Tailwind utility-first does not mean every UI must be abstracted into components.
-When reuse and behavior are uncertain, prefer writing utilities directly.
-Abstract only when the UI has stable reuse and includes behavior (for example, event handlers).
+Tailwindのユーティリティファーストとは、「全てのUIが下位コンポーネントの組み合わせでできている」わけではなく、**確信できない部分はユーティリティで書く**という思想である。コンポーネントとして抽象化するのは、再利用性と振る舞い（イベントハンドラ等）を含む場合のみ。
 
-### Prohibited
+### 禁止事項
 
-- Using `@apply`
-- Defining custom classes outside Tailwind (including `@layer utilities` custom classes)
-- Accepting `className` as a generic extension prop by default (except controlled wrappers)
-- CSS-only abstractions such as `.btn-primary` or `.surface-panel`
-- Adding new `@keyframes` to `globals.css`
+- `@apply` ディレクティブの使用
+- Tailwind外でのCSSクラス定義（`@layer utilities` でのカスタムクラスも含む）
+- `className` をpropsで受け取る設計（バリエーションは除く）
+- CSSのみの抽象化（例: `.btn-primary`, `.surface-panel` のような定義）
+- `globals.css` への新規 `@keyframes` 追加
 
-### Allowed
+### 許可事項
 
-- Component abstraction that includes behavior and not just style
-- Variant modeling with `cva`
-- Limited `.prose` usage for rich-text rendering
-- Normalize/reset rules in `@layer base`
-- Design token definitions via `@theme`
-- Built-in Tailwind animations such as `animate-spin` and `animate-pulse`
+- UIコンポーネントとしての抽象化（ハンドラ等のロジックを含む）
+- `cva` によるバリエーション定義
+- `.prose` クラスの例外的な使用（リッチテキスト表示用）
+- `@layer base` でのnormalize/reset処理
+- `@theme` でのデザイントークン定義
+- Tailwindビルトインアニメーション（`animate-spin`, `animate-pulse` 等）
 
-### Design Goals
+### 設計目標
 
-- Manage design tokens as a single source of truth (color, type, radius, motion)
-- Use Tailwind in a token-first way and reduce arbitrary values in components
-- Use shadcn/ui as shared primitives while preserving brand identity
-- Keep future theming possible (dark mode, seasonal themes) without component rewrites
+- デザイントークンを単一のソースとして管理（color, type, radius, motion）
+- Tailwindをトークンファーストで使用し、コンポーネント内のarbitrary valueを削減
+- shadcn/uiを共通プリミティブとして採用しつつ、ブランドのルックを維持
+- 将来のテーマ対応（ダークモード、シーズナル）をコンポーネント改修なしで実現
 
 ## Design Tokens
 
 ### Token Architecture
 
-| Layer | Description | Example |
-|------|-------------|---------|
-| Base palette | Raw values without semantic intent | `--palette-ink-900`, `--palette-coral-100` |
-| Semantic tokens | Intent-based aliases | `--token-canvas`, `--token-text`, `--token-border` |
-| Component tokens | Component-specific overrides (only when needed) | `--token-dark-canvas` |
-| Motion tokens | Timing and easing | `--duration-fast`, `--ease-standard` |
+| レイヤー | 説明 | 例 |
+|----------|------|-----|
+| Base palette | 生のカラー値のみ（意図なし） | `--palette-ink-900`, `--palette-coral-100` |
+| Semantic tokens | 意図を表現 | `--token-canvas`, `--token-text`, `--token-border` |
+| Component tokens | 特定コンポーネント用（必要時のみ） | `--token-dark-canvas` |
+| Motion tokens | duration/easing | `--duration-fast`, `--ease-standard` |
 
-### Tailwind v4 CSS-First Setup
+### Tailwind v4 CSS-first 設定
 
-Define tokens in `@theme` and expose them as utilities.
+`@theme` ディレクティブでトークンを定義し、ユーティリティとして公開:
 
 ```css
 @theme {
-  /* Colors */
+  /* Colors - semantic tokens */
   --color-background: var(--token-canvas);
   --color-foreground: var(--token-text);
   --color-primary: var(--token-surface-ink);
@@ -59,7 +57,7 @@ Define tokens in `@theme` and expose them as utilities.
   --font-body: "M PLUS Rounded 1c", sans-serif;
   --font-display: "Shippori Mincho B1", serif;
 
-  /* Radius */
+  /* Radius scale */
   --radius-sm: 0.5rem;
   --radius-md: 0.875rem;
   --radius-lg: 1.25rem;
@@ -68,24 +66,27 @@ Define tokens in `@theme` and expose them as utilities.
 }
 ```
 
-### Color Format
+### カラーフォーマット
 
-Use `oklch()` for all color definitions.
+全てのカラーは `oklch()` フォーマットを使用（知覚的均一性のため）:
 
 ```css
 :root {
+  /* Base palette */
   --palette-ink-900: oklch(0.21 0.02 285);
   --palette-ink-800: oklch(0.28 0.02 285);
   --palette-coral-100: oklch(0.90 0.08 50);
+
+  /* With alpha */
   --palette-line: oklch(0.21 0.03 285 / 0.12);
 }
 ```
 
-### JS Token Mirror
+### カラーマッピング（JS側）
 
-Mirror important color tokens in TypeScript for app-side usage.
+メンテナビリティのため、カラー定義はJS側でも参照可能にする:
 
-```ts
+```typescript
 // shared/lib/design-tokens.ts
 export const colors = {
   ink: {
@@ -98,41 +99,41 @@ export const colors = {
 } as const;
 ```
 
-## Arbitrary Value Rules
+## Arbitrary Values の制限
 
-Do not use arbitrary values in design-critical areas.
+**デザイン一貫性の核となる領域**では arbitrary value を禁止:
 
-| Area | Disallowed Example | Preferred Alternative |
-|------|--------------------|-----------------------|
-| Spacing | `p-[13px]`, `m-[7px]` | Tailwind scale (`p-3`, `m-2`) |
-| Font size | `text-[15px]` | Tokenized size via `@theme` |
-| Radius | `rounded-[10px]` | `--radius-*` tokens |
-| Colors | `bg-[#ff6b6b]` | Add to palette first |
+| 領域 | 禁止例 | 代替 |
+|------|--------|------|
+| Spacing | `p-[13px]`, `m-[7px]` | Tailwindスケール（`p-3`, `m-2`）を使用 |
+| Font size | `text-[15px]` | `@theme` でトークン定義 |
+| Border radius | `rounded-[10px]` | `--radius-*` トークンを使用 |
+| Colors | `bg-[#ff6b6b]` | パレットに追加してから使用 |
 
-Allowed cases:
+**許可されるケース:**
 
-- Layout-driven calculations such as `w-[calc(100%-2rem)]`
-- One-off visual backgrounds/gradients
-- Fixed values required by external constraints
+- レイアウト固有の寸法（`w-[calc(100%-2rem)]`）
+- アート的な背景・グラデーション
+- 外部制約による固定値（例: 動画プレイヤーのアスペクト比）
 
 ```tsx
-// Bad: arbitrary spacing and color
-<div className="p-[13px] bg-[#custom]" />
+// NG: spacing/color での arbitrary value
+<div className="p-[13px] bg-[#custom]">
 
-// Good: layout calculation
-<div className="w-[calc(100%-var(--sidebar-width))]" />
+// OK: 計算が必要なレイアウト
+<div className="w-[calc(100%-var(--sidebar-width))]">
 
-// Good: one-off artistic background
-<div className="bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))]" />
+// OK: 一度きりのアート的背景
+<div className="bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))]">
 ```
 
-When an exception is unavoidable, document the reason near the component.
+避けられない場合は、コンポーネントまたは近くのコメントで理由を文書化すること。
 
-## Component Design
+## コンポーネント設計
 
-### Variants with `cva`
+### cva によるバリエーション定義
 
-```ts
+```typescript
 import { cva, type VariantProps } from "class-variance-authority";
 
 const buttonVariants = cva(
@@ -154,7 +155,7 @@ const buttonVariants = cva(
       intent: "primary",
       size: "md",
     },
-  },
+  }
 );
 
 type ButtonProps = VariantProps<typeof buttonVariants> & {
@@ -163,9 +164,11 @@ type ButtonProps = VariantProps<typeof buttonVariants> & {
 };
 ```
 
-### Always Use `cn` for Conditional Classes
+### tailwind-merge の使用
 
-```ts
+クラス名の衝突を防ぐため、条件付きクラスには必ず `cn` ユーティリティを使用:
+
+```typescript
 // shared/lib/utils.ts
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -176,67 +179,66 @@ export function cn(...inputs: ClassValue[]) {
 ```
 
 ```tsx
-<div
-  className={cn(
-    "bg-card rounded-lg p-4",
-    isActive && "ring-2 ring-primary",
-  )}
-/>
+// 使用例
+<div className={cn(
+  "bg-card rounded-lg p-4",
+  isActive && "ring-2 ring-primary",
+)}>
 ```
 
-### `className` Policy
+### className props の扱い
 
-Default rule: do not accept generic `className` extension props.
+**基本ルール:** `className` をpropsで受け取らない
 
 ```tsx
-// Bad
+// NG: className を props で受け取る
 interface CardProps {
   className?: string;
   children: ReactNode;
 }
 
-// Good
+// OK: バリエーションで対応
 interface CardProps {
   variant: "default" | "elevated" | "outlined";
   children: ReactNode;
 }
 ```
 
-Exception: wrappers around shadcn primitives may internally accept `className`.
+**例外:** shadcn/ui のプリミティブをラップする場合は、内部実装として `className` を受け取ることがある
 
-## shadcn/ui Adoption
+## shadcn/ui 採用ポリシー
 
-### Recommended Primitives
+### 使用するプリミティブ
 
-`Button`, `Input`, `Textarea`, `Select`, `Dialog`, `Tooltip`, `Popover`, `Tabs`, `Badge`, `Card`, `DropdownMenu`
+Button, Input, Textarea, Select, Dialog, Tooltip, Popover, Tabs, Badge, Card, DropdownMenu
 
-### Brand Wrappers
+### ブランドラッパー
 
-Place brand-level wrappers in `shared/components/presenters`.
+`shared/components/presenters` にshadcnプリミティブを組み合わせたラッパーを配置:
 
-| Wrapper | Base | Added Behavior |
-|---------|------|----------------|
-| `ActionButton` | Button | Optional `href` support |
-| `SurfaceCard` | Card | Tone variants (`glass`, `soft`, `ink`) |
-| `TagPill` | Badge | Simplified API |
+| ラッパー | ベース | 追加機能 |
+|----------|--------|----------|
+| `ActionButton` | Button | `href` propによるリンク対応 |
+| `SurfaceCard` | Card | トーンバリアント（glass, soft, ink） |
+| `TagPill` | Badge | 簡略化されたAPI |
 
-### UI Primitive Inventory
+### UIプリミティブ一覧
 
-Keep low-level primitives in `shared/components/ui/`.
+`shared/components/ui/` に配置:
 
-| Component | Variants | Notes |
-|-----------|----------|-------|
-| `Button` | primary, secondary, ghost / sm, md, lg | CVA-based |
-| `Card` | - | Base card container |
-| `Badge` | mint, sky, lilac, amber, coral, ink | Color tones |
-| `Input` | default, error | Form input |
-| `Textarea` | default, error | Multiline input |
-| `Select` | default, error | Native select wrapper |
-| `Chart` | - | Recharts wrapper |
+| コンポーネント | バリアント | 備考 |
+|----------------|------------|------|
+| `Button` | primary, secondary, ghost / sm, md, lg | CVAベース |
+| `Card` | - | ベースカードコンテナ |
+| `Badge` | mint, sky, lilac, amber, coral, ink | カラートーン付き |
+| `Input` | default, error | フォーム入力 |
+| `Textarea` | default, error | 複数行テキスト |
+| `Select` | default, error | ネイティブセレクトラッパー |
+| `Chart` | - | Rechartsラッパー |
 
 ## Normalize / Reset
 
-Keep base rules inside `@layer base`.
+Tailwindの `@layer base` 内で行う:
 
 ```css
 @layer base {
@@ -264,10 +266,7 @@ Keep base rules inside `@layer base`.
     cursor: not-allowed;
   }
 
-  h1,
-  h2,
-  h3,
-  h4 {
+  h1, h2, h3, h4 {
     font-family: var(--font-display);
   }
 
@@ -277,15 +276,16 @@ Keep base rules inside `@layer base`.
 }
 ```
 
-## Animation Policy
+## アニメーション
 
-### Preferred Options
+### 推奨アプローチ
 
-1. UI animation libraries: Framer Motion, React Spring
-2. JS-driven animations: GSAP, Anime.js
-3. Tailwind built-ins: `animate-spin`, `animate-pulse`
+1. **UIライブラリ:** Framer Motion, React Spring
+2. **JSベースのアニメーション:** GSAP, Anime.js
+3. **Tailwindビルトイン:** `animate-spin`, `animate-pulse` 等
 
 ```tsx
+// Framer Motion での例
 import { motion } from "framer-motion";
 
 <motion.div
@@ -294,125 +294,116 @@ import { motion } from "framer-motion";
   transition={{ duration: 0.3, ease: "easeOut" }}
 >
   Content
-</motion.div>;
+</motion.div>
 ```
 
-### Disallowed
+### 禁止事項
 
-- Adding new `@keyframes` to `globals.css`
-- Defining CSS-only custom animations
+- `globals.css` に新規 `@keyframes` を追加すること
+- CSS-onlyのカスタムアニメーション定義
 
-### Legacy Migration
+### 既存コードの移行
 
-Treat existing CSS animations as legacy and migrate gradually to JS-based animations.
+`globals.css` に存在する以下は**レガシー**として扱い、段階的にJSベースに移行する:
 
-## Token Catalog
+- `@keyframes fadeUp` → Framer Motion
+- `@keyframes floaty` → Framer Motion
+- `@keyframes softPulse` → Framer Motion
+- `@layer utilities` 内のカスタムクラス → Reactコンポーネント化
 
-### Color Utilities
+## トークンカタログ
 
-| Token | Usage |
-|-------|-------|
-| `bg-background` / `text-foreground` | Main canvas |
-| `bg-primary` / `text-primary-foreground` | Primary action |
-| `bg-accent` / `text-accent-foreground` | Accent |
-| `bg-card` / `text-card-foreground` | Card surfaces |
-| `bg-dark-canvas` / `bg-dark-bar` | Dark-mode-only surfaces |
+`@theme` で定義され、Tailwindユーティリティとして使用可能なトークン:
 
-### Radius Utilities
+### Colors
 
-| Token | Value |
-|-------|-------|
+| トークン | 用途 |
+|----------|------|
+| `bg-background` / `text-foreground` | メインキャンバス |
+| `bg-primary` / `text-primary-foreground` | プライマリアクション |
+| `bg-accent` / `text-accent-foreground` | アクセント |
+| `bg-card` / `text-card-foreground` | カード背景 |
+| `bg-dark-canvas` / `bg-dark-bar` | ダークモード専用 |
+
+### Radius
+
+| トークン | 値 |
+|----------|-----|
 | `rounded-sm` | 0.5rem |
 | `rounded-md` | 0.875rem |
 | `rounded-lg` | 1.25rem |
 | `rounded-xl` | 1.5rem |
 | `rounded-2xl` | 2rem |
 
-### Shadow Variables
+### Shadow（CSS Variable経由）
 
-| Variable | Usage |
-|----------|-------|
-| `--shadow-card` | Standard cards |
-| `--shadow-action` | Action buttons and prominent controls |
-| `--shadow-hero` | Hero sections and large cards |
+| 変数 | 用途 |
+|------|------|
+| `--shadow-card` | 標準カード |
+| `--shadow-action` | アクションボタン、目立つ要素 |
+| `--shadow-hero` | ヒーローセクション、大きなカード |
 
-Usage example: `shadow-[var(--shadow-card)]` or inline `boxShadow: 'var(--shadow-card)'`.
+使用例: `shadow-[var(--shadow-card)]` または Reactコンポーネントで `style={{ boxShadow: 'var(--shadow-card)' }}`
 
-### Motion Variables
+### Motion（CSS Variable経由）
 
-| Variable | Value |
-|----------|-------|
+| 変数 | 値 |
+|------|-----|
 | `--duration-fast` | 150ms |
 | `--duration-md` | 300ms |
-| `--ease-standard` | `cubic-bezier(0.2, 0.7, 0.2, 1)` |
+| `--ease-standard` | cubic-bezier(0.2, 0.7, 0.2, 1) |
 
-## File Structure
+## ファイル構成
 
-```text
-services/my-app/
+```
+services/web/
 ├── app/
-│   └── globals.css          # only @theme, @layer base, CSS variables
+│   └── globals.css          # @theme, @layer base, CSS Variables のみ
 └── shared/
     ├── components/
-    │   ├── ui/              # shadcn/ui primitives (CVA)
-    │   └── presenters/      # brand wrappers
+    │   ├── ui/              # shadcn/ui プリミティブ (cva使用)
+    │   └── presenters/      # ブランドラッパー
     └── lib/
-        ├── utils.ts         # cn() utility
-        └── design-tokens.ts # optional JS token mirror
+        ├── utils.ts         # cn() ユーティリティ
+        └── design-tokens.ts # JS側のカラーマッピング（任意）
 ```
 
-### Allowed Content in `globals.css`
+### globals.css の許可内容
 
 ```css
-/* Allowed */
+/* 許可 */
 @import "tailwindcss";
-@theme {
-  /* ... */
-}
-@layer base {
-  /* ... */
-}
-:root {
-  /* CSS variables */
-}
+@theme { ... }
+@layer base { ... }
+:root { /* CSS Variables */ }
 
-/* Disallowed */
-@layer utilities {
-  .custom-class {
-    /* ... */
-  }
-}
-@keyframes newAnimation {
-  /* ... */
-}
-.my-class {
-  /* ... */
-}
+/* 禁止 */
+@layer utilities { .custom-class { ... } }  /* カスタムクラス定義 */
+@keyframes newAnimation { ... }              /* 新規アニメーション */
+.my-class { ... }                            /* Tailwind外のクラス */
 ```
 
-## Guardrails
+## ガードレール
 
-- Treat token names as stable; refactor usage sites instead of renaming published tokens
-- Add new colors to the palette first, then map them to semantic roles
-- Prefer the default Tailwind spacing scale; add custom spacing only when repeated usage is clear
-- Define all new colors in `oklch()` format
+- トークン名は安定版として扱う。公開後はトークン名ではなく使用箇所をリファクタする
+- 新しいカラーは最初にパレットに追加し、次にセマンティックロールにマッピングする
+- Tailwindデフォルトのspacingスケールを優先。繰り返し使う場合のみカスタムspacingを追加
+- 新しいカラーは全て `oklch()` フォーマットで記述する
 
-## Checklist
+## チェックリスト
 
-When adding new styles:
+新しいスタイルを追加する際:
 
-- [ ] No arbitrary values in design-critical areas
-- [ ] No `@apply`
-- [ ] No custom classes in `@layer utilities`
-- [ ] Components include behavior (event handlers, state), not just className wrappers
-- [ ] Variants are modeled with `cva`
-- [ ] Conditional classes use `cn()`
-- [ ] New colors use `oklch()`
-- [ ] Existing primitives (`ActionButton`, `SurfaceCard`, `TagPill`) were considered first
-- [ ] Props use explicit variant types over booleans when there are more than 2 states
-- [ ] `VariantProps<typeof variants>` is used with `cva` for variant prop types
+- [ ] arbitrary value がデザイン一貫性の核となる領域で使われていないか
+- [ ] `@apply` を使っていないか
+- [ ] `@layer utilities` でカスタムクラスを定義していないか
+- [ ] コンポーネントは振る舞い（ハンドラ等）を含んでいるか（CSSのみの抽象化になっていないか）
+- [ ] バリエーションは `cva` で定義されているか
+- [ ] 条件付きクラスは `cn()` を使っているか
+- [ ] 新しいカラーは `oklch()` フォーマットか
+- [ ] 既存のUIプリミティブ（`ActionButton`, `SurfaceCard`, `TagPill`）で対応できないか確認したか
 
-## References
+## 参考リンク
 
 - [Tailwind CSS v4 - Adding Custom Styles](https://tailwindcss.com/docs/adding-custom-styles)
 - [Class Variance Authority](https://cva.style/docs)

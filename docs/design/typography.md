@@ -1,46 +1,47 @@
-# Typography Guidelines
+# タイポグラフィガイドライン
 
-## Overview
+## 概要
 
-This project uses fonts that convey a soft and approachable feel.
+プロジェクトの目的やブランドに合わせたフォントを選択してください。
 
-## Fonts
+## フォント選択の原則
 
-### Body Font: M PLUS Rounded 1c
+### 本文フォント
 
-A rounded gothic typeface that gives a soft and friendly impression.
-
-```css
---font-body: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", "Yu Gothic",
-  "Noto Sans JP", sans-serif;
-```
-
-### Heading Font: Shippori Mincho B1
-
-A serif (Mincho) typeface that adds elegance and sophistication to headings.
+可読性が高く、長文でも疲れにくいフォントを選択します。
 
 ```css
---font-display: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho",
-  serif;
+--font-body: "your-body-font", system-ui, sans-serif;
 ```
 
-## Google Fonts Import
+### 見出しフォント
+
+ブランドの個性を表現するフォントを選択します。本文フォントとの対比でメリハリを出します。
 
 ```css
-@import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&family=Shippori+Mincho+B1:wght@600;700&display=swap");
+--font-display: "your-display-font", system-ui, serif;
 ```
 
-## Weights
+## Google Fonts 読み込み
 
-| Font | 400 | 500 | 600 | 700 |
-|------|-----|-----|-----|-----|
-| M PLUS Rounded 1c | ✓ | ✓ | - | ✓ |
-| Shippori Mincho B1 | - | - | ✓ | ✓ |
+```css
+@import url("https://fonts.googleapis.com/css2?family=YOUR_FONT:wght@400;500;700&display=swap");
+```
 
-## Application Rules
+## ウェイト
 
-- `h1` through `h4`: `--font-display` (Shippori Mincho B1)
-- Everything else: `--font-body` (M PLUS Rounded 1c)
+最低限以下のウェイトを用意してください：
+
+| 用途 | 推奨ウェイト |
+|------|-------------|
+| 本文 | 400 (Regular) |
+| 強調 | 500 (Medium) or 700 (Bold) |
+| 見出し | 600 (SemiBold) or 700 (Bold) |
+
+## 適用ルール
+
+- `h1` ~ `h4`: `--font-display`
+- その他: `--font-body`
 
 ```css
 h1, h2, h3, h4 {
@@ -48,23 +49,17 @@ h1, h2, h3, h4 {
 }
 ```
 
-## Text Size Utilities
+## テキストサイズユーティリティ
 
-| Class | Size | Use Case |
-|-------|------|----------|
-| `text-3xs` | 0.65rem (10.4px) | Extra-small text |
-| `text-2xs` | 0.7rem (11.2px) | Small labels |
-| `text-xs` | 0.75rem (12px) | Captions |
-| `text-sm` | 0.875rem (14px) | Small body text |
-| `text-base` | 1rem (16px) | Standard body text |
+| クラス | サイズ | 用途 |
+|--------|--------|------|
+| `text-3xs` | 0.65rem (10.4px) | 極小テキスト |
+| `text-2xs` | 0.7rem (11.2px) | 小さなラベル |
+| `text-xs` | 0.75rem (12px) | キャプション |
+| `text-sm` | 0.875rem (14px) | 小さな本文 |
+| `text-base` | 1rem (16px) | 標準本文 |
 
-## Prohibited Practices
+## 禁止事項
 
-- Using a font size below 10px (to ensure readability)
-- Setting line height below 1.4 (for readability of Japanese text)
-
-## References
-
-- [M PLUS Rounded 1c - Google Fonts](https://fonts.google.com/specimen/M+PLUS+Rounded+1c)
-- [Shippori Mincho B1 - Google Fonts](https://fonts.google.com/specimen/Shippori+Mincho+B1)
-- [CSS Guidelines](../css.md)
+- 10px未満のフォントサイズを使用すること（可読性の確保）
+- 行間を1.4未満に設定すること（日本語テキストの可読性）

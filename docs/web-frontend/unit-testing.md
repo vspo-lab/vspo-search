@@ -1,115 +1,119 @@
-# Unit Testing Guide
+# Unit Testing ガイド
 
-This document covers the research findings and recommendations for optimal unit testing tools for the project.
+本ドキュメントでは、プロジェクトに最適なユニットテストツールの調査結果と推奨事項をまとめる。
 
-## Quick Start
+## 関連ドキュメント
+
+- `docs/testing/unit-testing.md` - Unitテストの最新実装方針（モック最小 + テーブルドリブン）
+- `docs/web-frontend/twada-tdd.md` - t_wadaベースのTDD運用ルール
+
+## クイックスタート
 
 ```bash
-# Run tests
+# テスト実行
 pnpm test
 
-# Single run (for CI)
+# 単発実行（CI向け）
 pnpm test:run
 
-# With coverage
+# カバレッジ付き
 pnpm test:coverage
 ```
 
-## Current State Analysis
+## 現状分析
 
-### Project Status
-- **Test files**: 23 files (354 tests)
-- **Test framework**: Vitest v4.0.16
-- **Test configuration file**: `vitest.config.ts`
+### プロジェクトの状態
+- **テストファイル**: 23ファイル（354テスト）
+- **テストフレームワーク**: Vitest v4.0.16
+- **テスト設定ファイル**: `vitest.config.ts`
 
-### Key Components Under Test
+### テスト対象となる主要コンポーネント
 
 ```
-services/server/
-├── domain/           # Domain models and business logic (highest priority)
-│   ├── user/         # User aggregate
-│   ├── task/         # Task aggregate
-│   ├── report/       # Report aggregate
-│   └── billing/      # Subscription aggregate
-├── usecase/          # Application use cases
-├── pkg/              # Utility functions
-└── infra/repository/ # Repository layer
+services/api/
+├── domain/           # ドメインモデル・ビジネスロジック（最優先）
+│   ├── item/         # Item集約
+│   ├── order/        # Order集約
+│   
+├── usecase/          # アプリケーションユースケース
+├── pkg/              # ユーティリティ関数
+└── infra/repository/ # リポジトリ層
 ```
 
-### Technology Stack
-- **Runtime**: Node.js (ES Modules)
-- **Language**: TypeScript 5.8.3
-- **Framework**: Hono
+### 技術スタック
+- **ランタイム**: Node.js (ES Modules)
+- **言語**: TypeScript 5.8.3
+- **フレームワーク**: Hono
 - **ORM**: Drizzle ORM
-- **Error handling**: Result type (`@vspo/errors`)
+- **エラーハンドリング**: Result型（`@vspo/errors`）
 
 ---
 
-## Test Framework Comparison
+## テストフレームワーク比較
 
-### 1. Vitest -- **Recommended**
+### 1. Vitest ⭐ **推奨**
 
-| Criteria | Rating |
-|----------|--------|
-| ESM support | Excellent - Native |
-| TypeScript support | Excellent - Zero config |
-| Performance | Excellent - 10-20x faster than Jest (watch mode) |
-| Hono integration | Excellent - Official support |
-| Ease of configuration | Excellent - Zero config |
-| Ecosystem | Good - Mature |
+| 項目 | 評価 |
+|------|------|
+| ESM サポート | ◎ ネイティブ対応 |
+| TypeScript サポート | ◎ 設定不要 |
+| パフォーマンス | ◎ Jest比 10-20倍高速（watch mode） |
+| Hono連携 | ◎ 公式サポート |
+| 設定の容易さ | ◎ ゼロコンフィグ |
+| エコシステム | ○ 成熟度高い |
 
-**Features:**
-- Vite-based for fast startup and HMR
-- Jest-compatible API (easy migration)
-- Vitest 3.0 released January 2025 (7M+ weekly downloads)
-- Test filtering by line number
+**特徴:**
+- Viteベースで高速な起動・HMR
+- Jest互換API（移行が容易）
+- 2025年1月にVitest 3.0リリース（週間700万DL超）
+- 行番号によるテストフィルタリング機能
 
-**References:**
-- [Vitest](https://vitest.dev/)
-- [Vitest 3.0 Release Notes](https://vitest.dev/blog/vitest-3)
+**参考リンク:**
+- [Vitest 公式](https://vitest.dev/)
+- [Vitest 3.0 リリースノート](https://vitest.dev/blog/vitest-3)
 - [Migration Guide](https://vitest.dev/guide/migration.html)
 
 ---
 
 ### 2. Jest
 
-| Criteria | Rating |
-|----------|--------|
-| ESM support | Fair - Experimental (complex configuration) |
-| TypeScript support | Fair - Requires ts-jest |
-| Performance | Fair - Slower than Vitest |
-| Hono integration | Good - Possible |
-| Ease of configuration | Fair - Extra config needed for ESM/TS |
-| Ecosystem | Excellent - Most mature |
+| 項目 | 評価 |
+|------|------|
+| ESM サポート | △ 実験的（設定が複雑） |
+| TypeScript サポート | △ ts-jest必要 |
+| パフォーマンス | △ Vitest比で遅い |
+| Hono連携 | ○ 可能 |
+| 設定の容易さ | △ ESM/TSには追加設定必要 |
+| エコシステム | ◎ 最も成熟 |
 
-**Features:**
-- Long-standing de facto standard
-- Jest 30 released June 2025 (ESM improvements)
-- Recommended if React Native is a must
+**特徴:**
+- 長年のデファクトスタンダード
+- 2025年6月にJest 30リリース（ESM改善）
+- React Native必須の場合は推奨
 
-**References:**
-- [Jest](https://jestjs.io/)
-- [Jest vs Vitest Comparison (Medium)](https://medium.com/@ruverd/jest-vs-vitest-which-test-runner-should-you-use-in-2025-5c85e4f2bda9)
+**参考リンク:**
+- [Jest 公式](https://jestjs.io/)
+- [Jest vs Vitest 比較（Medium）](https://medium.com/@ruverd/jest-vs-vitest-which-test-runner-should-you-use-in-2025-5c85e4f2bda9)
 
 ---
 
 ### 3. Bun Test
 
-| Criteria | Rating |
-|----------|--------|
-| ESM support | Excellent - Native |
-| TypeScript support | Excellent - No transpilation needed |
-| Performance | Excellent - Fastest (sync tests) |
-| Hono integration | Good - Possible |
-| Ease of configuration | Excellent - Zero config |
-| Ecosystem | Fair - Still developing |
+| 項目 | 評価 |
+|------|------|
+| ESM サポート | ◎ ネイティブ |
+| TypeScript サポート | ◎ トランスパイル不要 |
+| パフォーマンス | ◎ 最速（同期テスト） |
+| Hono連携 | ○ 可能 |
+| 設定の容易さ | ◎ ゼロコンフィグ |
+| エコシステム | △ 発展途上 |
 
-**Features:**
-- 2x faster than Node.js (sync tests)
-- Performance drops for async tests due to single-threaded nature
-- Requires adopting the Bun runtime entirely
+**特徴:**
+- Node.jsの2倍高速（同期テスト）
+- 非同期テストは単一スレッドのため性能低下
+- Bunランタイム全体の採用が前提
 
-**References:**
+**参考リンク:**
 - [Bun Test Runner](https://bun.sh/docs/cli/test)
 - [Node vs Bun Test Runner](https://dev.to/boscodomingo/node-test-runner-vs-bun-test-runner-with-typescript-and-esm-44ih)
 
@@ -117,60 +121,60 @@ services/server/
 
 ### 4. Node.js Native Test Runner
 
-| Criteria | Rating |
-|----------|--------|
-| ESM support | Good - Supported |
-| TypeScript support | Poor - Requires loader (tsx) |
-| Performance | Good |
-| Hono integration | Good - Possible |
-| Ease of configuration | Fair - TypeScript config required |
-| Ecosystem | Fair - Still developing |
+| 項目 | 評価 |
+|------|------|
+| ESM サポート | ○ 対応 |
+| TypeScript サポート | × ローダー必要（tsx） |
+| パフォーマンス | ○ 良好 |
+| Hono連携 | ○ 可能 |
+| 設定の容易さ | △ TypeScript設定必要 |
+| エコシステム | △ 発展途上 |
 
-**Features:**
-- Zero dependencies (built into Node.js)
-- No snapshot testing or timer mock support
-- Best for simple projects
+**特徴:**
+- 依存ゼロ（Node.js組み込み）
+- スナップショットテスト・タイマーモック未対応
+- シンプルなプロジェクト向け
 
-**References:**
+**参考リンク:**
 - [Node.js Test Runner](https://nodejs.org/api/test.html)
-- [Better Stack Comparison](https://betterstack.com/community/guides/testing/best-node-testing-libraries/)
+- [Better Stack 比較記事](https://betterstack.com/community/guides/testing/best-node-testing-libraries/)
 
 ---
 
-## Recommendation: Vitest
+## 推奨: Vitest
 
-### Selection Rationale
+### 選定理由
 
-1. **Native ESM support**: The project uses `"type": "module"`
-2. **TypeScript zero config**: No need for additional setup like ts-jest
-3. **Official Hono support**: Test helpers and client provided
-4. **Fast feedback**: Fast test execution in CI and during development
-5. **Jest-compatible API**: Low learning curve
+1. **ESM ネイティブサポート**: プロジェクトが `"type": "module"` を使用
+2. **TypeScript ゼロコンフィグ**: ts-jest等の追加設定不要
+3. **Hono公式サポート**: テストヘルパー・クライアント提供
+4. **高速なフィードバック**: CI/開発時のテスト実行が高速
+5. **Jest互換API**: 学習コスト低
 
-### Performance Comparison
+### パフォーマンス比較
 
-| Benchmark | Vitest | Jest |
-|-----------|--------|------|
-| Cold start | 4x faster | Baseline |
-| Watch mode | 10-20x faster | Baseline |
-| Memory usage | 30% reduction | Baseline |
+| ベンチマーク | Vitest | Jest |
+|-------------|--------|------|
+| コールドスタート | 4倍高速 | 基準 |
+| Watch mode | 10-20倍高速 | 基準 |
+| メモリ使用量 | 30%削減 | 基準 |
 
-*Reference: [Vitest vs Jest (Better Stack)](https://betterstack.com/community/guides/scaling-nodejs/vitest-vs-jest/)*
+*参考: [Vitest vs Jest（Better Stack）](https://betterstack.com/community/guides/scaling-nodejs/vitest-vs-jest/)*
 
 ---
 
-## Installation Steps
+## 導入手順
 
-### 1. Install Dependencies
+### 1. 依存関係のインストール
 
 ```bash
-# Run in the services/server directory
+# services/api ディレクトリで実行
 pnpm add -D vitest @vitest/coverage-v8
 ```
 
-### 2. Create Vitest Configuration File
+### 2. Vitest設定ファイル作成
 
-`services/server/vitest.config.ts`:
+`services/api/vitest.config.ts`:
 
 ```typescript
 import { defineConfig } from 'vitest/config'
@@ -188,13 +192,13 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': '/services/server',
+      '@': '/services/api',
     },
   },
 })
 ```
 
-### 3. Add Scripts to package.json
+### 3. package.json にスクリプト追加
 
 ```json
 {
@@ -206,9 +210,9 @@ export default defineConfig({
 }
 ```
 
-### 4. TypeScript Configuration (Optional)
+### 4. TypeScript設定（オプション）
 
-Add Vitest types to `services/server/tsconfig.json`:
+`services/api/tsconfig.json` にVitest型を追加:
 
 ```json
 {
@@ -220,28 +224,28 @@ Add Vitest types to `services/server/tsconfig.json`:
 
 ---
 
-## Testing Strategy
+## テスト戦略
 
-### Table-driven Tests (Go-style)
+### テーブルドリブンテスト（Go-like）
 
-This project adopts **Go-style table-driven tests**.
+本プロジェクトでは **Go言語スタイルのテーブルドリブンテスト** を採用する。
 
-#### Basic Pattern
+#### 基本パターン
 
 ```typescript
 import { describe, expect, it } from "vitest";
 
-describe("functionName", () => {
+describe("関数名", () => {
   const testCases = [
     {
-      name: "case 1 description",
-      input: { /* input values */ },
-      expected: { /* expected values */ },
+      name: "ケース1の説明",
+      input: { /* 入力値 */ },
+      expected: { /* 期待値 */ },
     },
     {
-      name: "case 2 description",
-      input: { /* input values */ },
-      expected: { /* expected values */ },
+      name: "ケース2の説明",
+      input: { /* 入力値 */ },
+      expected: { /* 期待値 */ },
     },
   ];
 
@@ -252,80 +256,80 @@ describe("functionName", () => {
 });
 ```
 
-#### Practical Example: User.new
+#### 実践例: Item.create
 
 ```typescript
-describe("User.new", () => {
+describe("Item.create", () => {
   const testCases = [
     {
-      name: "basic user creation",
-      input: { name: "Taro Yamada", email: "yamada@example.com" },
+      name: "基本的なアイテム作成",
+      input: { name: "サンプルアイテム", status: "active" },
       expected: {
-        name: "Taro Yamada",
-        email: "yamada@example.com",
-        emailVerified: false,
-        image: null,
+        name: "サンプルアイテム",
+        status: "active",
+        createdAt: new Date(),
+        quantity: 1,
       },
     },
     {
-      name: "user creation with image",
+      name: "メタデータ付きアイテム作成",
       input: {
-        name: "Hanako Sato",
-        email: "sato@example.com",
-        image: "https://example.com/avatar.png",
+        name: "別のアイテム",
+        status: "draft",
+        metadata: { key: "value" },
       },
       expected: {
-        name: "Hanako Sato",
-        email: "sato@example.com",
-        image: "https://example.com/avatar.png",
+        name: "別のアイテム",
+        status: "draft",
+        metadata: { key: "value" },
       },
     },
   ];
 
   it.each(testCases)("$name", ({ input, expected }) => {
-    const user = User.new(input);
-    expect(user).toMatchObject(expected);
+    const item = Item.create(input);
+    expect(item).toMatchObject(expected);
   });
 });
 ```
 
-#### Type Guard Tests
+#### Type Guard テスト
 
 ```typescript
-describe("UserProfile.isAdmin", () => {
+describe("ItemStatus.isActive", () => {
   const testCases = [
     {
-      name: "returns true for admin profile",
-      profile: adminProfile,
+      name: "アクティブなアイテムの場合 true",
+      profile: activeItem,
       expected: true,
     },
     {
-      name: "returns false for regular user profile",
-      profile: userProfile,
+      name: "アーカイブされたアイテムの場合 false",
+      profile: archivedItem,
       expected: false,
     },
   ];
 
   it.each(testCases)("$name", ({ profile, expected }) => {
-    expect(UserProfile.isAdmin(profile)).toBe(expected);
+    expect(ItemStatus.isActive(profile)).toBe(expected);
   });
 });
 ```
 
-### Benefits of Table-driven Tests
+### テーブルドリブンテストのメリット
 
-1. **Coverage**: Manage input patterns in a list, preventing omissions
-2. **Readability**: Test cases are organized as data
-3. **Maintainability**: Adding new cases is easy (just append to the array)
-4. **Debugging**: `$name` makes it clear which case failed
+1. **網羅性**: 入力パターンを一覧で管理、漏れを防止
+2. **可読性**: テストケースがデータとして整理される
+3. **保守性**: 新規ケース追加が容易（配列に追加するだけ）
+4. **デバッグ**: 失敗時に `$name` でどのケースか明確
 
-### Domain Model Tests (Highest Priority)
+### ドメインモデルテスト（最優先）
 
-The domain layer contains pure functions and deterministic logic, making it testable without mocks.
+ドメイン層は純粋関数・決定的なロジックが多く、モック不要でテスト可能。
 
-### Use Case Tests
+### ユースケーステスト
 
-Require mocking of repositories and transaction managers.
+リポジトリやトランザクションマネージャーのモックが必要。
 
 ```typescript
 // usecase/user.test.ts
@@ -335,15 +339,15 @@ import { createUser } from "./user";
 describe("createUser", () => {
   const testCases = [
     {
-      name: "successfully creates a user",
+      name: "正常にユーザーを作成",
       mockReturn: { isOk: () => true },
-      input: { name: "Test", email: "test@example.com" },
+      input: { name: "Test", status: "active" },
       expectedOk: true,
     },
     {
-      name: "fails on repository error",
+      name: "リポジトリエラー時は失敗",
       mockReturn: { isOk: () => false, error: "DB_ERROR" },
-      input: { name: "Test", email: "test@example.com" },
+      input: { name: "Test", status: "active" },
       expectedOk: false,
     },
   ];
@@ -361,9 +365,9 @@ describe("createUser", () => {
 });
 ```
 
-### Hono Endpoint Tests
+### Honoエンドポイントテスト
 
-Integration tests using Hono's `app.request()`.
+Honoの `app.request()` を使用した統合テスト。
 
 ```typescript
 // infra/http/user.test.ts
@@ -373,12 +377,12 @@ import { app } from "./app";
 describe("GET /api/users/:id", () => {
   const testCases = [
     {
-      name: "retrieves an existing user",
+      name: "存在するユーザーを取得",
       path: "/api/users/123",
       expectedStatus: 200,
     },
     {
-      name: "returns 404 for non-existent user",
+      name: "存在しないユーザーは404",
       path: "/api/users/999",
       expectedStatus: 404,
     },
@@ -391,13 +395,13 @@ describe("GET /api/users/:id", () => {
 });
 ```
 
-*Reference: [Hono Testing Guide](https://hono.dev/docs/guides/testing)*
+*参考: [Hono Testing Guide](https://hono.dev/docs/guides/testing)*
 
 ---
 
-## Database Testing Strategy
+## データベーステスト戦略
 
-### Option 1: Repository Mocks (Recommended)
+### 選択肢1: リポジトリモック（推奨）
 
 ```typescript
 const mockUserRepo = {
@@ -406,9 +410,9 @@ const mockUserRepo = {
 }
 ```
 
-**Pros**: Fast, no external dependencies, ideal for unit tests
+**利点**: 高速、外部依存なし、ユニットテストに最適
 
-### Option 2: PGlite (In-memory Postgres)
+### 選択肢2: PGlite（インメモリPostgres）
 
 ```typescript
 import { PGlite } from '@electric-sql/pglite'
@@ -418,12 +422,12 @@ const client = new PGlite()
 const db = drizzle(client)
 ```
 
-**Pros**: Can test actual SQL
-**Note**: Full compatibility is not guaranteed since the project uses MySQL
+**利点**: 実際のSQLをテスト可能
+**注意**: MySQL使用のため、完全な互換性は保証されない
 
-*Reference: [Drizzle + PGlite Testing](https://github.com/rphlmr/drizzle-vitest-pg)*
+*参考: [Drizzle + PGlite テスト](https://github.com/rphlmr/drizzle-vitest-pg)*
 
-### Option 3: Testcontainers
+### 選択肢3: Testcontainers
 
 ```typescript
 import { MySQLContainer } from '@testcontainers/mysql'
@@ -431,19 +435,19 @@ import { MySQLContainer } from '@testcontainers/mysql'
 const container = await new MySQLContainer().start()
 ```
 
-**Pros**: Production-equivalent MySQL environment
-**Cons**: Requires Docker, slower test execution
+**利点**: 本番同等のMySQL環境
+**欠点**: Docker必要、テスト速度低下
 
 ---
 
-## Proposed Directory Structure
+## ディレクトリ構成案
 
 ```
-services/server/
+services/api/
 ├── domain/
-│   ├── user/
+│   ├── domain/
 │   │   ├── user.ts
-│   │   └── user.test.ts      # Co-location
+│   │   └── user.test.ts      # コロケーション
 │   └── task/
 │       ├── task.ts
 │       └── task.test.ts
@@ -451,16 +455,16 @@ services/server/
 │   ├── user.ts
 │   └── user.test.ts
 ├── vitest.config.ts
-└── vitest.setup.ts            # Global setup
+└── vitest.setup.ts            # グローバルセットアップ
 ```
 
-**Co-location approach**: Test files are placed in the same directory as source files
+**コロケーション方式**: テストファイルをソースファイルと同じディレクトリに配置
 
 ---
 
-## CI/CD Integration
+## CI/CD 統合
 
-### GitHub Actions Example
+### GitHub Actions 例
 
 ```yaml
 # .github/workflows/test.yml
@@ -486,90 +490,80 @@ jobs:
 
 ---
 
-## References
+## 参考リンク
 
-### Official Documentation
-- [Vitest](https://vitest.dev/)
+### 公式ドキュメント
+- [Vitest 公式](https://vitest.dev/)
 - [Hono Testing Guide](https://hono.dev/docs/guides/testing)
 - [Hono Testing Helper](https://hono.dev/docs/helpers/testing)
 
-### Comparison Articles
+### 比較記事
 - [Jest vs Vitest: Which Test Runner Should You Use in 2025?](https://medium.com/@ruverd/jest-vs-vitest-which-test-runner-should-you-use-in-2025-5c85e4f2bda9)
 - [Vitest vs Jest | Better Stack](https://betterstack.com/community/guides/scaling-nodejs/vitest-vs-jest/)
 - [Best Node.js Testing Libraries | Better Stack](https://betterstack.com/community/guides/testing/best-node-testing-libraries/)
 
-### Drizzle ORM Testing
+### Drizzle ORM テスト
 - [Drizzle + Vitest + PGlite Example](https://github.com/rphlmr/drizzle-vitest-pg)
 - [NestJS + Drizzle Unit Tests](https://wanago.io/2024/09/23/api-nestjs-drizzle-orm-unit-tests/)
 
 ---
 
-## Summary
+## まとめ
 
-| Aspect | Recommendation |
-|--------|----------------|
-| Framework | **Vitest** |
-| Priority test target | Domain models (`domain/`) |
-| Test placement | Co-location (same directory) |
-| DB testing | Repository mocks |
-| Coverage | v8 provider |
+| 観点 | 推奨 |
+|------|------|
+| フレームワーク | **Vitest** |
+| 優先テスト対象 | ドメインモデル（`domain/`） |
+| テスト配置 | コロケーション（同一ディレクトリ） |
+| DBテスト | リポジトリモック |
+| カバレッジ | v8 プロバイダー |
 
 ---
 
-## Test Implementation Guide
+## テスト実装ガイド
 
-### Layer-based Test Structure
+### レイヤー別テスト構成
 
-Current tests are divided into the following layers:
+現在のテストは以下のレイヤーに分かれている：
 
 ```
-services/server/
-├── domain/                    # Domain model tests (172 tests)
-│   ├── user/
-│   │   ├── user.test.ts       # User aggregate
-│   │   └── user-profile.test.ts
-│   ├── task/
-│   │   ├── task.test.ts
-│   │   ├── task-status.test.ts
-│   │   └── step.test.ts
-│   ├── report/
-│   │   ├── report.test.ts
-│   │   └── report-item.test.ts
-│   ├── billing/
-│   │   └── subscription.test.ts
-│   ├── highlight/
-│   │   └── highlight.test.ts
-│   ├── survey/
-│   │   └── survey.test.ts
-│   └── focused-topic.test.ts
-├── usecase/                   # Use case tests (36 tests)
-│   ├── user.test.ts
-│   ├── highlight.test.ts
-│   ├── survey.test.ts
-│   └── focusedTopic.test.ts
-├── pkg/                       # Utility tests (49 tests)
+services/api/
+├── domain/                    # ドメインモデルテスト
+│   ├── item/
+│   │   ├── item.test.ts       # Item集約
+│   │   └── item-status.test.ts
+│   ├── order/
+│   │   ├── order.test.ts
+│   │   └── line-item.test.ts
+│   └── report/
+│       ├── report.test.ts
+│       └── report-item.test.ts
+├── usecase/                   # ユースケーステスト
+│   ├── item.test.ts
+│   └── order.test.ts
+├── pkg/                       # ユーティリティテスト
 │   ├── date.test.ts
 │   ├── uuid.test.ts
 │   └── textNormalizer.test.ts
 ├── infra/
-│   └── stripe/                # Infra layer tests (22 tests)
-│       ├── stripe-service.test.ts
-│       └── price-mapping.test.ts
+│   └── external-api/          # Infra層テスト
+│       ├── external-api-service.test.ts
+│       └── config-mapping.test.ts
 └── test/
-    └── integration/           # Integration tests (run separately)
+    └── integration/           # 統合テスト（別途実行）
         └── routes/
 
-packages/errors/               # Error handling tests (75 tests)
+packages/errors/               # エラーハンドリングテスト
 ├── result.test.ts
 ├── error.test.ts
 └── code.test.ts
 ```
 
-### Mock Patterns for UseCase Layer Tests
+### Usecase層テストのモックパターン
 
-UseCase layer tests mock the Repository and TxManager.
+Usecase層のテストでは、Repository と TxManager をモックする。
 
-#### 1. TxManager Mock
+#### 1. TxManager モック
 
 ```typescript
 import type { TxManager } from "../infra/repository/txManager";
@@ -579,14 +573,14 @@ const mockTxManager: TxManager = {
 };
 ```
 
-`runTx` executes a callback within a transaction. The mock invokes the callback immediately.
+`runTx`はトランザクション内でコールバックを実行する。モックでは即座にコールバックを呼び出す。
 
-#### 2. Repository Mock
+#### 2. Repository モック
 
 ```typescript
 import type { UserRepository } from "../infra/repository/user";
 
-// Mock function type definitions
+// モック関数の型定義
 let getByIdMock: ReturnType<
   typeof vi.fn<(id: string) => Promise<Result<User, AppError>>>
 >;
@@ -610,21 +604,21 @@ beforeEach(() => {
 });
 ```
 
-Since the `from()` pattern is used, the mock follows the same structure.
+`from()`パターンを使用しているため、モックも同じ構造にする。
 
-#### 3. Writing Test Cases
+#### 3. テストケースの書き方
 
 ```typescript
 describe("getById", () => {
   const testCases = [
     {
-      name: "returns Ok when user is found",
+      name: "ユーザーが見つかった場合、Okを返す",
       userId: "user-123",
-      repoResult: () => Ok(createMockUser()),
+      repoResult: () => Ok(createMockItem()),
       expectOk: true,
     },
     {
-      name: "returns Err when user is not found",
+      name: "ユーザーが見つからない場合、Errを返す",
       userId: "not-found",
       repoResult: () =>
         Err(new AppError({ message: "User not found", code: "NOT_FOUND" })),
@@ -655,48 +649,42 @@ describe("getById", () => {
 });
 ```
 
-**Key points:**
-- Making `repoResult` a function ensures a new Result instance is created for each test case
-- `expectedCode` is only set for error cases
+**ポイント:**
+- `repoResult`を関数にすることで、各テストケースごとに新しいResultインスタンスを生成
+- `expectedCode`はエラーケースのみに設定
 
-### Mock Patterns for Infra Layer Tests
+### Infra層テストのモックパターン
 
-Mock patterns for external services (Stripe, etc.).
+外部APIサービスのモックパターン。
 
 ```typescript
-const createMockStripe = () => ({
-  customers: {
+const createMockExternalAPI = () => ({
+  resources: {
     create: vi.fn(),
     retrieve: vi.fn(),
+    list: vi.fn(),
   },
-  checkout: {
-    sessions: {
-      create: vi.fn(),
-    },
-  },
-  billingPortal: {
-    sessions: {
-      create: vi.fn(),
-    },
+  actions: {
+    execute: vi.fn(),
   },
   webhooks: {
-    constructEvent: vi.fn(),
+    verifySignature: vi.fn(),
   },
 });
 
-describe("StripeService", () => {
-  describe("createCustomer", () => {
+describe("ExternalAPIService", () => {
+  describe("createResource", () => {
     const testCases = [
       {
-        name: "can create a customer",
-        input: { userId: "user-123", email: "test@example.com", name: "Test" },
-        mockResult: { id: "cus_123", email: "test@example.com" },
+        name: "リソースを作成できる",
+        input: { userId: "user-123", status: "active", name: "Test" },
+        mockResult: { id: "res_123", status: "active" },
         expectOk: true,
       },
       {
-        name: "returns Err on Stripe API error",
-        input: { userId: "user-123", email: "test@example.com", name: "Test" },
-        mockError: new Error("Stripe API Error"),
+        name: "外部APIエラーの場合、Errを返す",
+        input: { userId: "user-123", status: "active", name: "Test" },
+        mockError: new Error("External API Error"),
         expectOk: false,
         expectedCode: "INTERNAL_SERVER_ERROR",
       },
@@ -709,15 +697,15 @@ describe("StripeService", () => {
       expectOk,
       expectedCode,
     }) => {
-      const mockStripe = createMockStripe();
+      const mockAPI = createMockExternalAPI();
       if (mockResult) {
-        mockStripe.customers.create.mockResolvedValue(mockResult);
+        mockAPI.resources.create.mockResolvedValue(mockResult);
       } else if (mockError) {
-        mockStripe.customers.create.mockRejectedValue(mockError);
+        mockAPI.resources.create.mockRejectedValue(mockError);
       }
 
-      const service = createStripeService(mockStripe as never, "secret");
-      const result = await service.createCustomer(input);
+      const service = createExternalAPIService(mockAPI as never, "secret");
+      const result = await service.createResource(input);
 
       if (expectOk) {
         expect(result.err).toBeUndefined();
@@ -729,40 +717,29 @@ describe("StripeService", () => {
 });
 ```
 
-### Test Helper Factories
+### テストヘルパーファクトリ
 
-Create factory functions for domain objects and reuse them.
+ドメインオブジェクトのファクトリ関数を作成し、再利用する。
 
 ```typescript
-// Mock user factory
-const createMockUser = (overrides: Partial<User> = {}): User => ({
-  id: "user-123",
-  name: "Test User",
-  email: "test@example.com",
-  emailVerified: false,
-  image: null,
-  usage: {
-    plan: "free",
-    taskCount: 0,
-    lastLoginAt: undefined,
-    planExpiresAt: undefined,
+// モックアイテムファクトリ
+const createMockItem = (overrides: Partial<Item> = {}): User => ({
+  id: "item-123",
+  name: "Test Item",
+  status: "active",
+  createdAt: new Date(),
+  quantity: 1,
+  // ...
   },
-  settings: {
-    theme: "system",
-    notificationsEnabled: true,
-    emailNotificationsEnabled: true,
-    soundEnabled: true,
-    language: "ja",
   },
-  profile: {
-    careerType: null,
-    displayName: null,
-    birthYear: null,
-    graduationExpectedYear: null,
-    simpleJobHuntingStatus: null,
-    practiceGoals: [],
-    onboardingCompleted: false,
-    onboardingStep: 0,
+    category: null,
+    description: null,
+    price: null,
+    quantity: 1,
+    tags: [],
+    metadata: {},
+    ,
+    ,
   },
   createdAt: new Date("2025-01-01T00:00:00.000Z"),
   updatedAt: new Date("2025-01-01T00:00:00.000Z"),
@@ -770,18 +747,18 @@ const createMockUser = (overrides: Partial<User> = {}): User => ({
 });
 ```
 
-### Testing Environment Variables
+### 環境変数のテスト
 
 ```typescript
-describe("price-mapping", () => {
+describe("config", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
     vi.resetModules();
     process.env = {
       ...originalEnv,
-      STRIPE_PRICE_LIGHT: "price_light_123",
-      STRIPE_PRICE_STANDARD: "price_standard_456",
+      API_BASE_URL: "https://api.example.com",
+      API_TIMEOUT: "5000",
     };
   });
 
@@ -789,26 +766,26 @@ describe("price-mapping", () => {
     process.env = originalEnv;
   });
 
-  it.each(testCases)("$name", ({ priceId, expected }) => {
-    expect(mapPriceIdToPlanType(priceId)).toBe(expected);
+  it.each(testCases)("$name", ({ input, expected }) => {
+    expect(getConfig(input)).toBe(expected);
   });
 });
 ```
 
-### Test Naming Conventions
+### テスト命名規則
 
-Write test case names descriptively in English:
+日本語でテストケース名を記述する：
 
 ```typescript
 const testCases = [
-  { name: "returns Ok when user is found", ... },
-  { name: "returns Err when user is not found", ... },
-  { name: "returns Err when update fails", ... },
-  { name: "returns Err when survey is already answered", ... },
+  { name: "ユーザーが見つかった場合、Okを返す", ... },
+  { name: "ユーザーが見つからない場合、Errを返す", ... },
+  { name: "更新失敗した場合、Errを返す", ... },
+  { name: "既に処理済みの場合、Errを返す", ... },
 ];
 ```
 
-**Naming patterns:**
-- Success cases: `"can ...", "returns ..."`
-- Error cases: `"returns Err when ..."`
-- Conditional: `"when ... then ..."`
+**命名パターン:**
+- 正常系: `「〜できる」「〜を返す」`
+- 異常系: `「〜の場合、Errを返す」`
+- 条件付き: `「〜が〜の場合、〜」`

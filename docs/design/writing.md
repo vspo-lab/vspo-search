@@ -1,162 +1,199 @@
-# Writing Guidelines
+# ライティングガイドライン
 
-## Overview
+## 概要
 
-Good writing is a key element of a great user experience. This guide establishes the principles and rules for creating consistent, readable, and clear text across the product.
+伝わる文章を書くことは、ユーザー体験を向上させる重要な要素です。本ガイドラインでは、一貫性があり、読みやすく、わかりやすい文章を作成するための原則とルールを定めます。
 
-## 3 Core Principles
+## 3つの基本原則
 
-### 1. Tailor Information to the Purpose
+### 1. 目的に合わせた情報の取捨選択
 
-Consider the reader's context (where they are reading, their prior knowledge, etc.) and carefully select what to communicate and how to express it.
+読み手となる相手の状況（読む場面、事前知識など）を踏まえ、言葉にする内容や表現を厳選します。
 
-| Considerations | Example |
-|---------------|---------|
-| Reader's knowledge level | Whether to use technical terms or plain language |
-| Reading context | Quick scan vs. in-depth reading |
-| Information needs | Overview only vs. full details |
+| 考慮すべきポイント | 例 |
+|------------------|-----|
+| 読者の知識レベル | 専門用語を使うか、平易な言葉に置き換えるか |
+| 読む場面 | 急いでいる時に読むか、じっくり読むか |
+| 求めている情報 | 概要だけ知りたいか、詳細まで知りたいか |
 
-### 2. Choose Words Carefully
+### 2. 適切な言葉選び
 
-Select words thoughtfully, keeping in mind the impression they will make on the reader.
+読者が受け取る印象を意識しながら、言葉を注意深く選択します。
 
-- Prefer positive phrasing
-- Avoid vague expressions
-- Use language familiar to the reader
+- 肯定的な表現を優先する
+- 曖昧な表現を避ける
+- 読者に馴染みのある言葉を使う
 
-### 3. Use Correct Grammar
+### 3. 正しい文法
 
-Pay attention to sentence structure and follow proper grammar rules.
+文章を構成する要素を意識し、文法を正しく守ります。
 
-- Subject-verb agreement
-- Modifier placement
-- Proper use of prepositions and articles
+- 主語と述語の対応
+- 修飾語の位置
+- 助詞の適切な使用
 
-## Practical Rules
+## 実践ルール
 
-### Keep sentences concise
+### 一文は50文字程度
 
-Long sentences are hard to read and understand. Aim for short, clear sentences.
-
-```
-Bad:  By using this feature, users will be able to change their
-      notification preferences from their account settings screen,
-      which allows for greater customization. (too long)
-
-Good: Use this feature to change notification settings from your account. (concise)
-```
-
-### Clarify subjects and objects
-
-Make subjects explicit and do not omit grammatical objects.
+長い文章は読みにくく、理解しづらくなります。一文は50文字程度を目安にします。
 
 ```
-Bad:  Deleted data.
-Good: The data was deleted.
+❌ NG: この機能を使用することで、ユーザーは自分のアカウント設定画面から
+      通知の受信設定を変更することができるようになります。（60文字）
 
-Bad:  Can change settings.
-Good: You can change the settings.
+✅ OK: この機能でアカウント設定から通知設定を変更できます。（27文字）
 ```
 
-### Use punctuation appropriately
+### 主語と格助詞の明確化
 
-Place punctuation at meaningful chunk boundaries. Avoid breaking text into unnecessarily small fragments.
-
-```
-Bad:  Tomorrow, with Mr. Tanaka, in the meeting room, we will, have a meeting.
-Good: Tomorrow we will have a meeting with Mr. Tanaka in the meeting room.
-```
-
-### Avoid double negatives
-
-Double negatives are hard to understand. Prefer affirmative phrasing.
+主語を明確にし、格助詞（を、に、が等）を省略しません。
 
 ```
-Bad:  You cannot complete without entering input.
-Good: Enter input to complete.
+❌ NG: データ削除しました。
+✅ OK: データを削除しました。
 
-Bad:  Not configuring does not mean you won't be notified.
-Good: You will be notified even without configuring.
+❌ NG: 設定変更できます。
+✅ OK: 設定を変更できます。
 ```
 
-### Maintain consistent notation
+### 読点の適切な使用
 
-Use standard characters as the default and keep notation consistent across the project.
-
-| Category | Rule |
-|----------|------|
-| Characters | Use standard character sets |
-| Numbers | Use digits with commas every 3 digits (e.g., 100,000) |
-| Symbols | Use standard punctuation consistently |
-| Units | No space between number and unit (e.g., 10px) |
-
-## 5 Writing Goals
-
-### 1. Consistency
-
-Use unified expressions to prevent notation from varying across screens.
+意味のかたまり（チャンク）の区切りに読点を打ちます。ただし、無駄な読点で細切れにしないよう注意します。
 
 ```
-Bad:  "Save changes" on screen A, "Save" on screen B
-Good: Use "Save" consistently across all screens
+❌ NG: 明日、田中さんと、会議室で、打ち合わせを、します。
+✅ OK: 明日、田中さんと会議室で打ち合わせをします。
 ```
 
-### 2. Cohesion
+### 二重否定を避ける
 
-Unify the vocabulary used throughout the product so users do not experience inconsistencies between screens.
-
-### 3. Discoverability
-
-Structure content and use familiar terminology so users can easily find the information they need.
-
-- Prefer commonly used terms
-- Include keywords that users are likely to search for
-
-### 4. Standardization
-
-Publish the rationale behind word choices so that consistent quality is maintained regardless of individual skill or preference.
-
-### 5. Efficiency
-
-Leverage established writing patterns and examples to streamline the word selection process.
-
-## UI Text Rules
-
-### Button Labels
-
-| Type | Format | Example |
-|------|--------|---------|
-| Action button | Ends with a verb | Save, Delete |
-| Confirmation button | Noun or verb | OK, Cancel, Close |
-| Navigation | Noun | Home, Settings |
-
-### Error Messages
-
-Refer to the [Content Guidelines](./content-guidelines.md).
-
-### Placeholders
+二重否定は理解しづらいため、肯定文を優先します。
 
 ```
-Bad:  Please enter a value
-Good: e.g., John Smith
+❌ NG: 入力しないと完了できません。
+✅ OK: 入力すると完了できます。
+
+❌ NG: 設定しなければ通知されないことはありません。
+✅ OK: 設定しなくても通知されます。
 ```
 
-### Labels
+### 表記の統一
+
+常用漢字を基本とし、プロジェクト内で表記を統一します。
+
+| カテゴリ | ルール |
+|----------|--------|
+| 漢字 | 常用漢字を基本とする |
+| 数字 | 半角数字、3桁ごとにカンマ（例: 100,000） |
+| 記号 | 全角を使用（句読点、括弧など） |
+| 単位 | 数字と単位の間にスペースなし（例: 10px） |
+
+## ドキュメント（Markdown）の書き方
+
+UI文言だけでなく、`docs/` に書く技術文書にも同じ品質基準を適用します。
+
+### 見出しの設計
+
+- 1ファイルに `#` は1つだけ使う
+- セクションは `##`、必要に応じて `###` までを基本にする
+- 見出しだけで内容が想像できる名前を使う
+
+### 冒頭で目的を明記する
+
+本文の最初に「このドキュメントで何を定義するか」を1〜2文で書きます。  
+読み手が必要な情報かどうかをすぐ判断できる状態を作ります。
+
+### 箇条書きと手順の使い分け
+
+- 順序がある説明は番号付きリストを使う
+- 順序がない説明は箇条書きを使う
+- 1項目1メッセージを守る
+
+### コードブロックの原則
+
+- 実行可能な単位で掲載する
+- `bash`, `ts`, `json` など言語指定を付ける
+- 前提条件がある場合は、コードブロックの直前に書く
+
+### リンク運用
+
+- リポジトリ内参照は相対パスを使う
+- 「こちら」「ここ」ではなく、遷移先が分かるリンクテキストにする
+- 仕様の根拠は一次情報（公式ドキュメント）を優先する
+
+### textlint との併用
+
+文章品質は、人手レビューと `textlint` を併用して担保します。  
+詳細な運用方針は [docs/security/textlint.md](../security/textlint.md) を参照してください。
+
+## 5つのライティング目標
+
+### 1. 一貫性
+
+画面ごとに表記がばらつかないよう、統一された表現を使用します。
 
 ```
-Bad:  Enter your name:
-Good: Name
+❌ NG: A画面では「保存する」、B画面では「保存」
+✅ OK: すべての画面で「保存」に統一
 ```
 
-## Prohibited Practices
+### 2. 統一感
 
-- Using raw machine translation output
-- Using technical jargon without explanation
-- Overuse of honorifics (overly polite expressions)
-- Using imperative forms (except for user instructions)
-- Excessive use of "etc." or "and so on"
+プロダクト全体で使用する言葉を統一し、画面ごとに雰囲気が違うといった違和感をユーザーに与えません。
 
-## References
+### 3. 検索性
 
-- [Content Guidelines](./content-guidelines.md)
-- [Accessibility Guidelines](./accessibility.md)
+ユーザーが必要な情報に辿り着きやすい構造にしたり、馴染みのある言葉を使います。
+
+- 一般的に使われる用語を優先
+- 検索されやすいキーワードを含める
+
+### 4. 標準化
+
+言葉を決める際の根拠を公開することで、個人のスキルや好みに依らず一定の品質で言葉を決められるようにします。
+
+### 5. 効率化
+
+必要な言葉をスムーズに決定できるよう、ライティングパターンや事例を活用します。
+
+## UI上のテキストルール
+
+### ボタンラベル
+
+| 種類 | 形式 | 例 |
+|------|------|-----|
+| アクションボタン | 動詞で終わる | 保存する、削除する |
+| 確認ボタン | 名詞または動詞 | OK、キャンセル、閉じる |
+| ナビゲーション | 名詞 | ホーム、設定 |
+
+### エラーメッセージ
+
+[コンテンツガイドライン](./content-guidelines.md)を参照してください。
+
+### プレースホルダー
+
+```
+❌ NG: 入力してください
+✅ OK: 例: 山田太郎
+```
+
+### ラベル
+
+```
+❌ NG: お名前を入力:
+✅ OK: お名前
+```
+
+## 禁止事項
+
+- 機械翻訳をそのまま使用すること
+- 専門用語の説明なしの使用
+- 敬語の過剰使用（丁寧すぎる表現）
+- 命令形の使用（ユーザーへの指示を除く）
+- 「など」「等」の多用
+
+## 参考リンク
+
+- [コンテンツガイドライン](./content-guidelines.md)
+- [アクセシビリティガイドライン](./accessibility.md)

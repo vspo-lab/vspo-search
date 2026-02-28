@@ -17,7 +17,7 @@ echo -e "${YELLOW}=== Security Scan (Docker) ===${NC}"
 echo ""
 
 # 1. Trivy filesystem scan
-echo -e "${YELLOW}[1/3] Running Trivy filesystem scan...${NC}"
+echo -e "${YELLOW}[1/4] Running Trivy filesystem scan...${NC}"
 if docker run --rm -v "$(pwd)":/work -w /work aquasec/trivy:latest fs --severity CRITICAL,HIGH --exit-code 1 --ignorefile .trivyignore .; then
   echo -e "${GREEN}Trivy filesystem scan passed${NC}"
 else
@@ -28,7 +28,7 @@ echo ""
 
 # 2. Trivy container scan (optional)
 if [ "$1" == "--docker" ]; then
-  echo -e "${YELLOW}[2/3] Building and scanning Docker image...${NC}"
+  echo -e "${YELLOW}[2/4] Building and scanning Docker image...${NC}"
   docker build -f services/transcriptor/Dockerfile -t transcriptor:scan services/transcriptor --quiet
   if docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$(pwd)":/work -w /work aquasec/trivy:latest image --severity CRITICAL,HIGH --exit-code 1 --ignorefile .trivyignore transcriptor:scan; then
     echo -e "${GREEN}Trivy container scan passed${NC}"
@@ -37,12 +37,22 @@ if [ "$1" == "--docker" ]; then
     FAILED=1
   fi
 else
-  echo -e "${YELLOW}[2/3] Skipping Docker scan (use --docker to enable)${NC}"
+  echo -e "${YELLOW}[2/4] Skipping Docker scan (use --docker to enable)${NC}"
 fi
 echo ""
 
-# 3. Semgrep (SAST)
-echo -e "${YELLOW}[3/3] Running Semgrep...${NC}"
+# 3. gitleaks (secret detection)
+echo -e "${YELLOW}[3/4] Running gitleaks...${NC}"
+if docker run --rm -v "$(pwd)":/work -w /work zricethezav/gitleaks:latest detect --source . --no-banner 2>/dev/null; then
+  echo -e "${GREEN}gitleaks passed - no secrets found${NC}"
+else
+  echo -e "${RED}gitleaks found potential secrets${NC}"
+  FAILED=1
+fi
+echo ""
+
+# 4. Semgrep (SAST)
+echo -e "${YELLOW}[4/4] Running Semgrep...${NC}"
 if docker run --rm -v "$(pwd)":/src semgrep/semgrep:latest semgrep scan --config auto --quiet 2>/dev/null; then
   echo -e "${GREEN}Semgrep passed${NC}"
 else

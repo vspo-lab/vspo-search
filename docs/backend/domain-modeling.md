@@ -2,286 +2,243 @@
 
 ## Overview
 
-This document defines the design principles and structure for domain modeling. All application-specific domain models should be implemented following these guidelines.
+このドキュメントでは、ドメインモデリングの設計方針と構造を定義します。アプリケーション固有のドメインモデルは、この方針に従って実装してください。
 
-## File Structure
+## ファイル構成
 
-Domain models are organized into directories by aggregate. Each aggregate clearly separates its root entity and value objects.
+ドメインモデルは集約ごとにディレクトリを分割し、各集約のルートエンティティと値オブジェクトを明確に分離しています。
 
 ```
-services/server/domain/
-├── user/                    # User aggregate
-│   ├── user.ts             # User (aggregate root)
-│   ├── user-profile.ts     # UserProfile (value object, Discriminated Union)
-│   ├── user-usage.ts       # UserUsage (value object)
-│   ├── user-settings.ts    # UserSettings (value object)
-│   └── index.ts            # Barrel file
-├── [your-domain]/           # Application-specific aggregate
-│   ├── [aggregate-root].ts  # Aggregate root
-│   ├── [entity].ts          # Child entity
-│   └── index.ts
-├── billing/                 # Billing aggregate
-│   ├── subscription.ts     # Subscription (aggregate root)
-│   └── payment-history.ts  # PaymentHistory (entity)
-├── inquiry/                 # Inquiry aggregate
-│   └── inquiry.ts          # Inquiry (aggregate root)
-└── email/                   # Email aggregate
-    └── email.ts            # Email (entity)
+services/api/domain/
+└── [your-domain]/           # アプリケーション固有の集約
+    ├── [aggregate-root].ts  # 集約ルート
+    ├── [value-object].ts    # 値オブジェクト
+    ├── [entity].ts          # 子エンティティ
+    └── index.ts             # バレルファイル
 ```
 
-## Domain Model Design Principles
+## ドメインモデルの設計方針
 
 ### 1. Zod Schema First
 
-All type definitions are derived from Zod schemas:
+すべての型定義はZodスキーマから導出します：
 
 ```typescript
-// user-usage.ts
-export const userUsageSchema = z.object({
-  plan: planTypeSchema,
-  usageCount: z.number().int().nonnegative(),
-  lastLoginAt: z.date().optional(),
-  planExpiresAt: z.date().optional(),
+// item.ts
+export const itemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  status: z.enum(["active", "inactive"]),
+  createdAt: z.date(),
 });
-export type UserUsage = z.infer<typeof userUsageSchema>;
+export type Item = z.infer<typeof itemSchema>;
 ```
 
-### 2. Companion Object Pattern for Domain Methods
+### 2. ドメインメソッドはコンパニオンオブジェクトパターン
 
-Each domain model has a companion object with the same name that holds factory methods and business logic:
+各ドメインモデルは、同名のコンパニオンオブジェクトにファクトリメソッドやビジネスロジックを持ちます。
+公開関数には JSDoc で事前条件・事後条件を記述します。詳細は [関数ドキュメント規約](./function-documentation.md) を参照。
 
 ```typescript
-// user.ts
-export const User = {
-  new: (props: CreateUserProps): User => { ... },
-  update: (user: User, props: UpdateProps): User => { ... },
-  recordLogin: (user: User): User => { ... },
-  incrementUsageCount: (user: User): User => { ... },
+// item.ts
+export const Item = {
+  new: (props: CreateItemProps): Item => { ... },
+  update: (item: Item, props: UpdateProps): Item => { ... },
+  activate: (item: Item): Item => { ... },
+  deactivate: (item: Item): Item => { ... },
 } as const;
 ```
 
-### 3. Type Guards and Utilities
+### 3. 型ガードとユーティリティ
 
-When using Discriminated Unions, provide type guard functions:
+Discriminated Unionを使用する場合は、型ガード関数も提供します：
 
 ```typescript
-// user-profile.ts
-export const UserProfile = {
-  isTypeA: (profile: UserProfile): profile is TypeAProfile =>
-    profile.type === "type_a",
-  isTypeB: (profile: UserProfile): profile is TypeBProfile =>
-    profile.type === "type_b",
-  defaultUndecided: (): UndecidedProfile => ({ ... }),
+// item-detail.ts (Discriminated Union example)
+export const ItemDetail = {
+  isTypeA: (detail: ItemDetail): detail is TypeADetail =>
+    detail.type === "type_a",
+  isTypeB: (detail: ItemDetail): detail is TypeBDetail =>
+    detail.type === "type_b",
+  default: (): DefaultDetail => ({ type: "default" }),
 } as const;
 ```
 
-### 4. Immutable Updates
+### 4. イミュータブルな更新
 
-All update operations return new objects:
+すべての更新操作は新しいオブジェクトを返します：
 
 ```typescript
-const updatedUser = User.update(user, { displayName: "New Name" });
-const completedTask = Task.complete(task);
+const updatedItem = Item.update(item, { name: "新しい名前" });
+const activatedItem = Item.activate(item);
 ```
 
-## Repository Design Principles
+## リポジトリの設計方針
 
-### 1. Using drizzle-zod Schemas as DTOs
+### 1. drizzle-zodスキーマをDTOとして活用
 
-The repository layer uses Drizzle-generated `select*Schema` as DTOs to minimize manual mapping:
+リポジトリ層ではDrizzleが生成する`select*Schema`をDTOとして活用し、手動でのマッピングを最小化します：
 
 ```typescript
 import {
-  type SelectTask,
-  type SelectStep,
-  tasksTable,
-  selectStepsSchema,  // drizzle-zod schema
-  stepsTable,
+  type SelectItem,
+  type SelectItemDetail,
+  itemsTable,
+  selectItemDetailsSchema,  // drizzle-zod schema
+  itemDetailsTable,
 } from "./mysql/schema";
 
-// Helper to convert DB task + steps to domain aggregate
-const toTaskAggregate = (
-  task: SelectTask,
-  steps: SelectStep[],
-): Task => ({
-  id: task.id,
-  userId: task.userId,
-  // ... direct mapping
+// Helper to convert DB item + details to domain aggregate
+const toItemAggregate = (
+  item: SelectItem,
+  details: SelectItemDetail[],
+): Item => ({
+  id: item.id,
+  name: item.name,
+  // ... 直接マッピング
   // Use drizzle-zod schema as DTO for child entities
-  steps: steps.map((row) => selectStepsSchema.parse(row)),
+  details: details.map((row) => selectItemDetailsSchema.parse(row)),
 });
 
 // For simple entities, use schema directly
 return Ok(selectItemsSchema.parse(result.val[0]));
 ```
 
-### 2. Simple Mapping
+### 2. シンプルなマッピング
 
-Keep helper functions that convert DB rows to domain models simple:
+DBの行をドメインモデルに変換するヘルパー関数はシンプルに保ちます：
 
 ```typescript
-// Good: Simple mapping
-const toTaskAggregate = (
-  task: SelectTask,
-  steps: SelectStep[],
-): Task => ({
-  id: task.id,
-  userId: task.userId,
-  // ... direct mapping
-  steps: steps.map(toStep),
+// Good: シンプルなマッピング
+const toItemAggregate = (
+  item: SelectItem,
+  details: SelectItemDetail[],
+): Item => ({
+  id: item.id,
+  name: item.name,
+  // ... 直接マッピング
+  details: details.map(toItemDetail),
 });
 
-// Bad: Verbose expansion
-const tasks = tasksResult.val.map((task) => ({
-  id: task.id,
-  userId: task.userId,
-  // ... enumerating the same fields every time
+// Bad: 冗長な展開
+const items = itemsResult.val.map((item) => ({
+  id: item.id,
+  name: item.name,
+  // ... 毎回同じフィールドを列挙
 }));
 ```
 
-### 3. Avoiding N+1 Queries
+### 3. N+1問題の回避
 
-When fetching child entities of an aggregate, use `inArray` for batch retrieval:
+集約の子エンティティを取得する際は、`inArray`を使用して一括取得します：
 
 ```typescript
-// Good: Batch retrieval
-const taskIds = tasks.map((t) => t.id);
-const stepsResult = await tx
+// Good: 一括取得
+const itemIds = items.map((i) => i.id);
+const detailsResult = await tx
   .select()
-  .from(stepsTable)
-  .where(inArray(stepsTable.taskId, taskIds));
+  .from(itemDetailsTable)
+  .where(inArray(itemDetailsTable.itemId, itemIds));
 
-// Group by taskId
-const stepsByTaskId = new Map<string, SelectStep[]>();
-for (const step of stepsResult) {
-  const existing = stepsByTaskId.get(step.taskId) ?? [];
-  existing.push(step);
-  stepsByTaskId.set(step.taskId, existing);
+// Group by itemId
+const detailsByItemId = new Map<string, SelectItemDetail[]>();
+for (const detail of detailsResult) {
+  const existing = detailsByItemId.get(detail.itemId) ?? [];
+  existing.push(detail);
+  detailsByItemId.set(detail.itemId, existing);
 }
 
-// Bad: N+1 queries
-for (const task of tasks) {
-  const steps = await tx
+// Bad: N+1クエリ
+for (const item of items) {
+  const details = await tx
     .select()
-    .from(stepsTable)
-    .where(eq(stepsTable.taskId, task.id));
+    .from(itemDetailsTable)
+    .where(eq(itemDetailsTable.itemId, item.id));
 }
 ```
 
-### 4. Aligning Domain Models with DB Models
+### 4. ドメインモデルとDBモデルの一致
 
-Avoid excessive normalization and keep domain models aligned with DB models as closely as possible:
+過度な正規化を避け、ドメインモデルとDBモデルをできるだけ一致させます：
 
 ```typescript
-// Good: Flat structure matching the DB
-const surveySchema = z.object({
+// Good: DBと同じフラット構造
+const itemMetricsSchema = z.object({
   id: z.string(),
-  taskId: z.string(),
-  rating1: z.number(),
-  rating2: z.number(),
-  rating3: z.number(),
-  rating4: z.number(),
+  itemId: z.string(),
+  metric1: z.number(),
+  metric2: z.number(),
+  metric3: z.number(),
   // ...
 });
 
-// Bad: Unnecessary normalization (converting to arrays)
-const surveySchema = z.object({
-  responses: z.array(
+// Bad: 不必要な正規化（配列への変換）
+const itemMetricsSchema = z.object({
+  metrics: z.array(
     z.object({
-      questionType: z.string(),
-      rating: z.number(),
+      type: z.string(),
+      value: z.number(),
     })
   ),
 });
 ```
 
-When backward compatibility is needed for the API, perform the conversion in the DTO layer.
+APIの後方互換性が必要な場合は、DTO層で変換を行います。
 
-## Naming Conventions
+## 命名規則
 
-### Database
-- Table names: plural snake_case (`users`, `tasks`, `orders`)
-- Column names: snake_case (`user_id`, `created_at`, `task_id`)
-- Foreign keys: `{referenced_table_singular}_id` (`user_id`, `task_id`, `order_id`)
+### データベース
+- テーブル名: 複数形 snake_case (`users`, `items`, `orders`)
+- カラム名: snake_case (`user_id`, `created_at`, `item_id`)
+- 外部キー: `{参照先テーブル単数形}_id` (`user_id`, `item_id`, `order_id`)
 
-### Application
-- Domain models: PascalCase (`User`, `Task`, `Order`)
-- Type definitions: PascalCase (`TaskStatus`, `OrderType`)
-- Type aliases (for export): `{Model}Type` (`UserType`, `TaskType`)
-- Variables/properties: camelCase (`taskId`, `createdAt`)
-- Repositories: `{Model}Repository` (`TaskRepository`)
-- Use cases: `{Model}UseCase` (`TaskUseCase`)
+### アプリケーション
+- ドメインモデル: PascalCase (`User`, `Item`, `Order`)
+- 型定義: PascalCase (`ItemStatus`, `OrderType`)
+- 型エイリアス（export用）: `{Model}Type` (`UserType`, `ItemType`)
+- 変数/プロパティ: camelCase (`itemId`, `createdAt`)
+- リポジトリ: `{Model}Repository` (`ItemRepository`)
+- ユースケース: `{Model}UseCase` (`ItemUseCase`)
 
-## Data Persistence Principles
+## データ保存の基本方針
 
-- **Per-user storage**: All data is stored in association with a User
-- **Transaction management**: Operations spanning multiple repositories are managed with transactions at the use case layer
-- **Error handling with Result type**: All errors are handled uniformly using the Result type
-- **Aggregate-level updates**: Each aggregate is independently managed by its repository and use case, and persisted at the aggregate level
+- **ユーザー単位での保存**: すべてのデータはユーザー（User）に紐づいて保存されます
+- **トランザクション管理**: 複数のリポジトリを跨ぐ処理はユースケース層でトランザクションを管理します
+- **Result型によるエラーハンドリング**: すべてのエラーはResult型で統一的に扱います
+- **集約単位での更新**: 各集約はリポジトリとユースケースで独立して管理し、集約単位で保存します
 
-## Aggregate Boundaries
+## 集約境界
 
-Each aggregate is managed by its own use case and repository.
+各集約は独立したユースケースとリポジトリで管理します。
 
-### User Aggregate
-- **Root entity**: User
-- **Value objects**: UserUsage, UserSettings, UserProfile (Discriminated Union)
-- **Files**: `domain/user/`
-- **Use case**: `UserUseCase`
-- **Repository**: `UserRepository`
-- **Operations**: Create, update, retrieve, delete users
-- **Key methods**:
-  - `User.new()` - Create user
-  - `User.update()` - Update profile/settings
-  - `User.recordLogin()` - Record login
-  - `User.incrementUsageCount()` - Increment usage count
-  - `UserProfile.isTypeA()` / `isTypeB()` - Type guards
-
-### Billing Aggregate
-- **Root entity**: Subscription
-- **Child entity**: PaymentHistory
-- **Files**: `domain/billing/`
-- **Use case**: `BillingUseCase`
-- **Repositories**: `SubscriptionRepository`, `PaymentHistoryRepository`
-- **Operations**: Create/update subscriptions, manage payment history
-- **Note**: Integrates with Stripe for payment processing
-
-### Inquiry Aggregate
-- **Root entity**: Inquiry
-- **Files**: `domain/inquiry/`
-- **Use case**: `InquiryUseCase`
-- **Repository**: `InquiryRepository`
-- **Operations**: Create and retrieve inquiries
-
-### Transcript Aggregate (Cloudflare Worker)
-- **Service**: `services/transcriptor/`
-- **Domain models**: `TranscriptParams`, `TranscriptStage`, `TranscriptKey`
-- **Use case**: `TranscriptUseCase` (`fetch`, `fetchAndSave`)
-- **Repository**: `TranscriptRepository` (R2 storage)
-- **Infrastructure**: `TranscriptFetcher` (Cloudflare Container + yt-dlp)
-- **Orchestration**: `TranscriptWorkflow` (Cloudflare Workflow)
-- **Stages**: `raw` -> `chunked` -> `proofread`
-- **Storage path**: `transcripts/{stage}/{videoId}/{lang}.json`
-- **Shared package**: `@vspo/errors` (Result type)
+### [YourAggregate] (Example)
+- **ルートエンティティ**: [AggregateRoot]
+- **値オブジェクト**: [ValueObject1], [ValueObject2]
+- **子エンティティ**: [ChildEntity]
+- **ファイル**: `domain/[your-domain]/`
+- **ユースケース**: `[YourAggregate]UseCase`
+- **リポジトリ**: `[YourAggregate]Repository`
+- **操作**: 作成、更新、取得、削除
+- **主要メソッド**:
+  - `[AggregateRoot].new()` - 作成
+  - `[AggregateRoot].update()` - 更新
+  - `[AggregateRoot].[businessMethod]()` - ビジネスロジック
 
 ## Use Case Diagram (Example)
 
 ```mermaid
 flowchart LR
-  C[User]
-  UC1([Sign Up / Log In])
-  UC2([Complete Onboarding])
-  UC3([Home])
-  UC4([Use Feature])
-  UC5([View Results])
-  UC6([View History])
-  UC7([Manage Plan])
-  UC8([Change Settings])
+  C[ユーザー]
+  UC1([ログイン])
+  UC2([アイテム一覧])
+  UC3([アイテム作成])
+  UC4([アイテム編集])
+  UC5([アイテム削除])
 
-  C --> UC1 --> UC2 --> UC3 --> UC4 --> UC5
-  UC3 --> UC6
-  UC3 --> UC7
-  UC3 --> UC8
+  C --> UC1 --> UC2
+  UC2 --> UC3
+  UC2 --> UC4
+  UC2 --> UC5
 ```
 
 ## Class Diagram (Example)
@@ -290,131 +247,82 @@ flowchart LR
 classDiagram
 direction LR
 
-class User {
+class Item {
   +string id
   +string name
-  +string email
-  +boolean emailVerified
-  +string image
-  +UserUsage usage
-  +UserSettings settings
-  +UserProfile profile
+  +ItemStatus status
+  +ItemDetail[] details
   +DateTime createdAt
   +DateTime updatedAt
-  +new(props) User
-  +update(user, props) User
-  +recordLogin(user) User
-  +incrementUsageCount(user) User
+  +new(props) Item
+  +update(item, props) Item
+  +activate(item) Item
+  +deactivate(item) Item
 }
 
-class UserUsage {
-  +PlanType plan
-  +int usageCount
-  +DateTime lastLoginAt
-  +DateTime planExpiresAt
-}
-
-class UserSettings {
-  +ThemeType theme
-  +boolean notificationsEnabled
-  +boolean emailNotificationsEnabled
-  +boolean soundEnabled
-  +string language
-}
-
-class UserProfile {
-  +ProfileType type
-  +string displayName
-  ...
-  +isTypeA(profile) boolean
-  +isTypeB(profile) boolean
-}
-
-class Task {
+class ItemDetail {
   +string id
-  +string userId
-  +TaskStatus status
-  +Step[] steps
-  +DateTime startedAt
-  +DateTime endedAt
-  +start(props) Task
-  +addStep(task, step) Result
-  +complete(task) Task
-}
-
-class Step {
-  +string id
-  +StepRole role
+  +string itemId
+  +DetailType type
   +string content
-  +new(props) Step
+  +DateTime createdAt
+  +new(props) ItemDetail
+  +isTypeA(detail) boolean
+  +isTypeB(detail) boolean
 }
 
-User "1" --> "1" UserUsage : has
-User "1" --> "1" UserSettings : has
-User "1" --> "1" UserProfile : has
-User "1" --> "*" Task : owns
-Task "1" --> "*" Step : contains
+Item "1" --> "*" ItemDetail : contains
 ```
 
 ## ER Diagram (Example)
 
 ```mermaid
 erDiagram
-    users ||--|| user_usages : has
-    users ||--|| user_settings : has
-    users ||--|| user_profiles : has
-    users ||--o{ tasks : owns
-    tasks ||--o{ steps : contains
+    user ||--o{ account : has
+    user ||--o{ session : has
+    user ||--o{ verification : has
+    user ||--o{ your_table : owns
 
-    users {
+    user {
         varchar id PK
         varchar email UK
-        datetime created_at
-        datetime updated_at
+        varchar name
+        boolean emailVerified
+        varchar image
+        datetime createdAt
+        datetime updatedAt
     }
 
-    user_usages {
-        varchar user_id PK,FK
-        enum plan
-        int usage_count
-        datetime last_login_at
-        datetime plan_expires_at
+    account {
+        varchar id PK
+        varchar userId FK
+        varchar accountId
+        varchar providerId
+        varchar accessToken
+        varchar refreshToken
     }
 
-    user_settings {
-        varchar user_id PK,FK
-        enum theme
-        boolean notifications_enabled
-        boolean email_notifications_enabled
-        boolean sound_enabled
-        varchar language
+    session {
+        varchar id PK
+        varchar userId FK
+        datetime expiresAt
+        varchar token
+        varchar ipAddress
+        varchar userAgent
     }
 
-    user_profiles {
-        varchar user_id PK,FK
-        enum profile_type
-        varchar display_name
-        boolean onboarding_completed
-        int onboarding_step
-        datetime created_at
-        datetime updated_at
+    verification {
+        varchar id PK
+        varchar identifier
+        varchar value
+        datetime expiresAt
     }
 
-    tasks {
+    your_table {
         varchar id PK
         varchar user_id FK
+        varchar name
         enum status
-        datetime started_at
-        datetime ended_at
-        datetime created_at
-        datetime updated_at
-    }
-
-    steps {
-        varchar id PK
-        varchar task_id FK
-        enum role
-        longtext content
         datetime created_at
         datetime updated_at
     }
@@ -422,38 +330,26 @@ erDiagram
 
 ## Enums (Examples)
 
-### PlanType
-- `free` - Free plan
-- `basic` - Basic plan
-- `pro` - Pro plan
-- `enterprise` - Enterprise plan
+### ItemStatus
+- `active` - 有効
+- `inactive` - 無効
+- `archived` - アーカイブ済み
 
-### ThemeType
-- `light` - Light mode
-- `dark` - Dark mode
-- `system` - Follow system setting
-
-### TaskStatus
-- `in_progress` - In progress
-- `completed` - Completed
-- `failed` - Failed
-
-### StepRole
-- `system` - System
-- `user` - User
+### DetailType
+- `type_a` - タイプA
+- `type_b` - タイプB
+- `default` - デフォルト
 
 ## API Endpoints (Examples)
 
-### User API
-- `GET /me` - Get user information (includes usage, settings, profile)
-- `PUT /me` - Update user information (partial updates to usage, settings, profile)
-- `GET /me/dashboard` - Get dashboard data
-
-### Task API
-- `POST /tasks` - Start a task
-  - Request: `{ type, config? }`
-  - Response: `{ id, userId, status, steps, startedAt, ... }`
-- `GET /tasks/{taskId}` - Get a task
-- `POST /tasks/{taskId}/steps` - Add a step
-  - Request: `{ role, content }`
-- `POST /tasks/{taskId}/completion` - Complete a task
+### Item API
+- `GET /items` - アイテム一覧取得
+  - Response: `{ items: [{ id, name, status, createdAt, ... }] }`
+- `POST /items` - アイテム作成
+  - Request: `{ name, status? }`
+  - Response: `{ id, name, status, createdAt, updatedAt }`
+- `GET /items/{itemId}` - アイテム取得
+  - Response: `{ id, name, status, details, createdAt, updatedAt }`
+- `PUT /items/{itemId}` - アイテム更新
+  - Request: `{ name?, status? }`
+- `DELETE /items/{itemId}` - アイテム削除
