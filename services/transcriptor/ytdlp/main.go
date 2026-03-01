@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +11,10 @@ import (
 	"syscall"
 	"time"
 )
+
+var allowedBins = map[string]bool{
+	"yt-dlp": true,
+}
 
 type ExecRequest struct {
 	Bin  string   `json:"bin"`
@@ -32,7 +35,7 @@ func execHandler(w http.ResponseWriter, r *http.Request) {
 
 	var req ExecRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, fmt.Sprintf(`{"error":"invalid json: %s"}`, err), http.StatusBadRequest)
+		http.Error(w, `{"error":"invalid json"}`, http.StatusBadRequest)
 		return
 	}
 
@@ -41,7 +44,12 @@ func execHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cmd := exec.Command(req.Bin, req.Args...)
+	if !allowedBins[req.Bin] {
+		http.Error(w, `{"error":"bin not allowed"}`, http.StatusForbidden)
+		return
+	}
+
+	cmd := exec.Command(req.Bin, req.Args...) // nosemgrep: dangerous-exec-command
 	var stdout, stderr []byte
 	stdoutPipe, _ := cmd.StdoutPipe()
 	stderrPipe, _ := cmd.StderrPipe()
@@ -92,7 +100,10 @@ func readAll(r interface{ Read([]byte) (int, error) }) ([]byte, error) {
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, `{"status":"ok","instance":"%s"}`, os.Getenv("CLOUDFLARE_DURABLE_OBJECT_ID"))
+	json.NewEncoder(w).Encode(map[string]string{
+		"status":   "ok",
+		"instance": os.Getenv("CLOUDFLARE_DURABLE_OBJECT_ID"),
+	})
 }
 
 func main() {

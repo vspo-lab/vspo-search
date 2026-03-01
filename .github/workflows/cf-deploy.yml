@@ -39,15 +39,19 @@ jobs:
               - 'packages/**'
 
       - id: set-matrix
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_SERVICE: ${{ inputs.service }}
+          FILTER_CHANGES: ${{ steps.filter.outputs.changes }}
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            if [[ "${{ inputs.service }}" == "all" ]]; then
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            if [[ "$INPUT_SERVICE" == "all" ]]; then
               echo 'matrix=["transcriptor","web"]' >> "$GITHUB_OUTPUT"
             else
-              echo 'matrix=["${{ inputs.service }}"]' >> "$GITHUB_OUTPUT"
+              echo "matrix=[\"$INPUT_SERVICE\"]" >> "$GITHUB_OUTPUT"
             fi
           else
-            echo 'matrix=${{ steps.filter.outputs.changes }}' >> "$GITHUB_OUTPUT"
+            echo "matrix=$FILTER_CHANGES" >> "$GITHUB_OUTPUT"
           fi
 
   deploy:

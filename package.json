@@ -37,5 +37,10 @@
 		"typescript": "catalog:",
 		"vitest": "^4.0.18"
 	},
+	"pnpm": {
+		"overrides": {
+			"rollup": ">=4.59.0"
+		}
+	},
 	"packageManager": "pnpm@10.24.0"
 }

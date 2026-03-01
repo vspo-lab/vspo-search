@@ -1,7 +1,7 @@
 import { cn } from "@/shared/lib/utils";
 
 type LikeButtonProps = {
-	count: number;
+	count?: number;
 	isLiked: boolean;
 	onToggle?: () => void;
 	className?: string;
@@ -32,7 +32,11 @@ export function LikeButton({
 			>
 				{isLiked ? "♥" : "♡"}
 			</span>
-			<span className="text-[11px] tabular-nums text-text-muted">{count}</span>
+			{count !== undefined && (
+				<span className="text-[11px] tabular-nums text-text-muted">
+					{count}
+				</span>
+			)}
 		</button>
 	);
 }

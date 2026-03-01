@@ -75,6 +75,7 @@ export function PlayerBarPresenter() {
 						<div className="text-xs text-ink-muted truncate">{member.name}</div>
 					</div>
 					<LikeButton
+						count={currentClip.likeCount}
 						isLiked={isLiked(currentClip.id)}
 						onToggle={() => toggleLike(currentClip.id)}
 						className="ml-2"
